@@ -13,6 +13,7 @@ import { bboxContains, distanceToBbox, featureBounds, locate } from '../lib/geo'
 import { isFilterActive, pinMatchesFilter } from '../lib/records';
 import { CLASS_COLORS, CLASS_LABELS } from '../lib/score';
 import { useStore } from '../store';
+import { BackupReminder } from '../components/BackupReminder';
 import type { Pin, Visit } from '../types';
 
 function MapEvents({ onLongPress, onUserMove }: { onLongPress: (lat: number, lng: number) => void; onUserMove: () => void }) {
@@ -347,6 +348,8 @@ export function MapPage() {
           </div>
         </div>
       )}
+
+      <BackupReminder />
 
       {status === 'denied' && settings.locationChoice === 'allowed' && (
         <div className="banner">位置情報が許可されていません。地図を長押しするとピンを追加できます。</div>

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Toggle } from '../components/ui';
-import { exportCsv, exportJson, importJson } from '../data/backup';
+import { canShareFile, exportCsv, exportJson, importJson, lastBackupAt, shareJson } from '../data/backup';
 import { downloadRegion, fetchRegionIndex, formatSize, hasUpdate, type RegionIndex } from '../data/regions';
 import { deleteRegion } from '../data/repository';
 import { PREFECTURES } from '../lib/prefectures';
@@ -20,6 +20,7 @@ export function SettingsPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const { canInstall, install: installApp } = useInstallPrompt();
+  const [lastBackup, setLastBackup] = useState(lastBackupAt);
 
   const loadIndex = () => {
     setIndexError(null);
@@ -207,9 +208,25 @@ export function SettingsPage() {
 
       <section className="panel">
         <h3>バックアップ</h3>
-        <p className="muted small">記録はこの端末の中だけに保存されています。機種変更や消去に備えて、ときどきJSONで保存してください。</p>
+        <p className="muted small">記録はこの端末の中だけに保存されています。機種変更や消去に備えて、ときどきJSONで保存してください。7日以上保存していないと地図にお知らせが出ます。</p>
+        <p className="small">最後のバックアップ: {lastBackup != null ? new Date(lastBackup).toLocaleString('ja-JP', { dateStyle: 'medium', timeStyle: 'short' }) : 'まだありません'}</p>
         <div className="btn-stack">
-          <button className="btn btn-outline btn-block" onClick={async () => toast(`${await exportJson()}件の訪問記録を書き出しました`)}>
+          {canShareFile() && (
+            <button
+              className="btn btn-primary btn-block"
+              onClick={async () => {
+                try {
+                  const n = await shareJson();
+                  if (n != null) { setLastBackup(lastBackupAt()); toast(`${n}件の訪問記録をバックアップしました`); }
+                } catch (err) {
+                  toast(`バックアップできませんでした: ${(err as Error).message}`);
+                }
+              }}
+            >
+              Googleドライブなどに保存(共有)
+            </button>
+          )}
+          <button className="btn btn-outline btn-block" onClick={async () => { toast(`${await exportJson()}件の訪問記録を書き出しました`); setLastBackup(lastBackupAt()); }}>
             JSONでバックアップ
           </button>
           <button className="btn btn-outline btn-block" onClick={() => fileRef.current?.click()}>JSONから復元</button>

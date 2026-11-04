@@ -22,11 +22,81 @@ const stamp = () => {
   return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`;
 };
 
-export async function exportJson(): Promise<number> {
+async function backupBody() {
   const [pins, visits] = await Promise.all([listPins(), listVisits()]);
-  const body = { app: APP_ID, version: 1, exportedAt: new Date().toISOString(), pins, visits };
-  download(`訪問記録-${stamp()}.json`, JSON.stringify(body, null, 1), 'application/json');
-  return visits.length;
+  return { count: visits.length, json: JSON.stringify({ app: APP_ID, version: 1, exportedAt: new Date().toISOString(), pins, visits }, null, 1) };
+}
+
+export async function exportJson(): Promise<number> {
+  const { count, json } = await backupBody();
+  download(`訪問記録-${stamp()}.json`, json, 'application/json');
+  markBackedUp();
+  return count;
+}
+
+/** 共有シートで Google ドライブや LINE などに保存できる端末か */
+export const canShareFile = () => {
+  try {
+    return !!navigator.canShare?.({ files: [new File(['{}'], 'test.json', { type: 'application/json' })] });
+  } catch {
+    return false;
+  }
+};
+
+/** 共有シートでバックアップを渡す。キャンセルしたら null */
+export async function shareJson(): Promise<number | null> {
+  const { count, json } = await backupBody();
+  const file = new File([json], `訪問記録-${stamp()}.json`, { type: 'application/json' });
+  try {
+    await navigator.share({ files: [file], title: '訪問記録のバックアップ' });
+  } catch (e) {
+    if ((e as Error).name === 'AbortError') return null;
+    throw e;
+  }
+  markBackedUp();
+  return count;
+}
+
+// ---------- バックアップのリマインド ----------
+
+const LAST_BACKUP_KEY = 'tobikomi-last-backup';
+const SNOOZE_KEY = 'tobikomi-backup-snooze';
+const DAY = 24 * 60 * 60 * 1000;
+export const REMIND_AFTER_DAYS = 7;
+
+const readTime = (key: string) => {
+  try {
+    const v = localStorage.getItem(key);
+    return v ? Date.parse(v) : null;
+  } catch {
+    return null;
+  }
+};
+const writeTime = (key: string) => {
+  try {
+    localStorage.setItem(key, new Date().toISOString());
+  } catch {
+    // 保存できなくてもリマインドが出続けるだけ
+  }
+};
+
+export const lastBackupAt = () => readTime(LAST_BACKUP_KEY);
+export const markBackedUp = () => writeTime(LAST_BACKUP_KEY);
+/** 「あとで」を押したら1日出さない */
+export const snoozeBackupReminder = () => writeTime(SNOOZE_KEY);
+
+/**
+ * バックアップ後(一度もなければ最初の記録から)7日たち、その間に新しい記録があればリマインドする。
+ * 戻り値はバックアップしていない訪問記録の件数(リマインド不要なら 0)
+ */
+export function backupReminderCount(visits: Visit[], now = Date.now()): number {
+  const snoozed = readTime(SNOOZE_KEY);
+  if (snoozed != null && now - snoozed < DAY) return 0;
+  const last = lastBackupAt();
+  const pending = visits.filter((v) => last == null || Date.parse(v.createdAt) > last);
+  if (!pending.length) return 0;
+  const since = last ?? Math.min(...pending.map((v) => Date.parse(v.createdAt)));
+  return now - since >= REMIND_AFTER_DAYS * DAY ? pending.length : 0;
 }
 
 export async function importJson(file: File): Promise<{ pins: number; visits: number }> {

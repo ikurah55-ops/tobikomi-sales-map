@@ -114,8 +114,10 @@ function readTable(name, def) {
   };
   for (const [k, re] of Object.entries(def.columns ?? {})) find(k, re);
   if (def.ageBands) {
-    for (let b = 0; b < 18; b++) {
-      const re = b === 17 ? def.ageBands.last : def.ageBands.template.replace('{from}', b * 5).replace('{to}', b * 5 + 4);
+    // 最後の区分は「75歳以上」「85歳以上」など。count で区分の数を指定(既定18 = 85歳以上まで)
+    const count = def.ageBands.count ?? 18;
+    for (let b = 0; b < count; b++) {
+      const re = b === count - 1 ? def.ageBands.last : def.ageBands.template.replace('{from}', b * 5).replace('{to}', b * 5 + 4);
       find(`age${b}`, re);
     }
   }
@@ -128,7 +130,12 @@ function readTable(name, def) {
     for (const [k, i] of Object.entries(colIndex)) rec[k] = num(r[i]);
     map.set(key, rec);
   }
-  return { file, map, labels };
+  return { file, map, labels, get: (k) => lookup(map, k) };
+}
+
+// 境界の KEY_CODE は11桁。丁目のない町は統計表では9桁(末尾の「00」なし)なので読み替える
+function lookup(map, key) {
+  return map.get(key) ?? (key.length === 11 && key.endsWith('00') ? map.get(key.slice(0, 9)) : undefined);
 }
 
 // ---------- 境界 ----------
@@ -191,9 +198,14 @@ if (flag('inspect')) {
 console.log(`前処理: raw=${rawDir} 県=${prefArg}${onlyCity ? ` 市区町村=${onlyCity}` : '(県内すべて)'}${isDummy ? ' [ダミー]' : ''}`);
 const T = {};
 for (const [name, def] of Object.entries(config.tables)) T[name] = readTable(name, def);
-const laborRange = config.tables.labor.ageRange ?? '15+';
-if (laborRange !== '25-54') {
+const laborRange = config.tables.labor ? config.tables.labor.ageRange ?? '15+' : 'none';
+if (laborRange === 'none') {
+  notes.push('小地域集計に男女別の就業者数がないため、女性の非就業率は計算していません(重みは他の指標に按分されます)');
+} else if (laborRange !== '25-54') {
   notes.push(`女性の非就業率は小地域集計に年齢別の労働力状態がないため「女性${laborRange === '15+' ? '15歳以上' : laborRange}」で計算しています(仕様は25〜54歳)`);
+}
+if (config.tables.housingOwn) {
+  notes.push('持ち家と住宅の建て方の掛け合わせ表がないため、持ち家一戸建て率は「持ち家率 × 一戸建て率」で近似しています');
 }
 
 const boundary = await readBoundary(config.boundary, prefArg);
@@ -216,14 +228,20 @@ for (const f of boundary.features) {
   if (pref !== prefArg) continue;
   if (onlyCity && city !== onlyCity) continue;
 
-  const pop = T.population.map.get(key);
-  const hh = T.households.map.get(key);
-  const lab = T.labor.map.get(key);
-  const hou = T.housing.map.get(key);
-  const p15 = T.population2015?.map.get(key);
+  const pop = T.population.get(key);
+  const hh = T.households.get(key);
+  const fam = T.family?.get(key) ?? hh; // 家族類型が別の表のとき
+  const lab = T.labor?.get(key);
+  const hou = T.housing.get(key);
+  const own = T.housingOwn?.get(key); // 住宅の所有の関係が別の表のとき
+  const p15 = T.population2015?.get(key);
 
   const households = hh?.households ?? null;
-  const hidden = [pop, hh, lab, hou].some((r) => r?.hidden);
+  const hidden = [pop, hh, fam, lab, hou, own].some((r) => r?.hidden);
+  let od = hou?.ownedDetached ?? null;
+  if (od == null && own && hou?.detached != null && own.owned != null && own.ownTotal > 0) {
+    od = Math.round(hou.detached * (own.owned / own.ownTotal));
+  }
   let insufficient = false;
   let reason;
   if (!pop || !hh) { insufficient = true; reason = '統計表に該当なし'; }
@@ -249,12 +267,12 @@ for (const f of boundary.features) {
     pop: pop?.total ?? null,
     pop15: pop2015,
     age: ages,
-    gen: hh?.general ?? null,
-    cc: hh?.coupleChild ?? null,
+    gen: fam?.general ?? null,
+    cc: fam?.coupleChild ?? null,
     fT: lab?.femaleTotal ?? null,
     fE: lab?.femaleEmployed ?? null,
     main: hou?.main ?? null,
-    od: hou?.ownedDetached ?? null,
+    od,
   };
   if (insufficient) { props.ins = true; props.insR = reason; }
 

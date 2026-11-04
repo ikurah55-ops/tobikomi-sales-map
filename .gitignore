@@ -6,3 +6,4 @@ data/raw/*
 !data/raw/.gitkeep
 data/raw-dummy
 *.log
+.claude/scheduled_tasks.lock

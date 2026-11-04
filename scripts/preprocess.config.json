@@ -1,5 +1,5 @@
 {
-  "$comment": "e-Stat 令和2年国勢調査 小地域集計(実データ)用の設定。{pref} は都道府県コード(2桁)に置き換わる。列は2行目の日本語見出しを正規表現で探す(全角数字・波ダッシュは半角に正規化してから比較)。実データと見出しが違ったら npm run data:inspect で見出しを確認し、ここを書き換える。",
+  "$comment": "e-Stat 令和2年国勢調査 小地域集計(実データ)用の設定。{pref} は都道府県コード(2桁)に置き換わる。列は2行目の日本語見出しを正規表現で探す(全角数字・波ダッシュ・空白を正規化してから比較)。見出しは npm run data:inspect で確認できる。2026年11月に山形県のファイルで動作確認済み。",
   "dataYear": 2020,
   "source": "総務省統計局「令和2年国勢調査 小地域集計」「平成27年国勢調査 小地域集計」、e-Stat 境界データ(町丁・字等別)を加工して作成",
   "minHouseholds": 30,
@@ -25,43 +25,36 @@
   },
   "tables": {
     "population": {
+      "$comment": "T001082 年齢(5歳階級、4区分)別、男女別人口。5歳階級は70〜74歳までで、その上は75歳以上",
       "file": "tblT001082C{pref}.txt",
-      "columns": {
-        "total": "^総数(、年齢「不詳」含む)?$"
-      },
-      "ageBands": {
-        "template": "^総数{from}~{to}歳$",
-        "last": "^総数85歳以上$"
-      }
+      "columns": { "total": "^総数、年齢「不詳」含む$" },
+      "ageBands": { "count": 16, "template": "^総数{from}~{to}歳$", "last": "^総数75歳以上$" }
     },
     "population2015": {
+      "$comment": "平成27年 T000849 年齢(5歳階級、4区分)別、男女別人口",
       "file": "tblT000849C{pref}.txt",
       "optional": true,
-      "columns": { "total": "^(人口)?総数$" }
+      "columns": { "total": "^総数、年齢「不詳」含む$" }
     },
     "households": {
-      "file": "tblT001086C{pref}.txt",
-      "columns": {
-        "households": "^世帯総数$",
-        "general": "^一般世帯総数$",
-        "coupleChild": "夫婦と子供から成る世帯$"
-      }
+      "$comment": "T001081 男女別人口総数及び世帯総数",
+      "file": "tblT001081C{pref}.txt",
+      "columns": { "households": "^世帯総数$" }
     },
-    "labor": {
-      "file": "tblT001090C{pref}.txt",
-      "$comment": "小地域集計の労働力状態に年齢別がない場合は女性15歳以上で計算する。年齢別の列がある場合は ageRange を '25-54' にし、列の正規表現を変える",
-      "ageRange": "15+",
-      "columns": {
-        "femaleTotal": "^女(総数|15歳以上人口)$",
-        "femaleEmployed": "^女就業者$"
-      }
+    "family": {
+      "$comment": "T001084 世帯の家族類型別一般世帯数",
+      "file": "tblT001084C{pref}.txt",
+      "columns": { "general": "^一般世帯総数$", "coupleChild": "夫婦と子供から成る世帯$" }
     },
     "housing": {
-      "file": "tblT001100C{pref}.txt",
-      "columns": {
-        "main": "^主世帯総数$",
-        "ownedDetached": "^持ち家一戸建$"
-      }
+      "$comment": "T001086 住宅の建て方別世帯数",
+      "file": "tblT001086C{pref}.txt",
+      "columns": { "main": "^主世帯数$", "detached": "^一戸建$" }
+    },
+    "housingOwn": {
+      "$comment": "T001085 住宅の所有の関係別一般世帯数。持ち家×一戸建ての表がないため、持ち家率×一戸建て率で近似する",
+      "file": "tblT001085C{pref}.txt",
+      "columns": { "ownTotal": "^住宅に住む一般世帯$", "owned": "^持ち家$" }
     }
   }
 }

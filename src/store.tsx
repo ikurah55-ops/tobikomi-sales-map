@@ -115,6 +115,29 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       r.sort((a, b) => a.code.localeCompare(b.code));
       setRegions(r);
       setRegionsLoaded(true);
+
+      // ダミーデータの地域は、実データが公開されていれば自動で入れ替える
+      const dummies = r.filter((x) => x.isDummy);
+      if (!dummies.length) return;
+      try {
+        const index = await fetchRegionIndex();
+        let replaced = 0;
+        for (const d of dummies) {
+          const entry = index.regions.find((e) => e.code === d.code && !e.isDummy);
+          if (entry) {
+            await downloadRegion(entry);
+            replaced++;
+          }
+        }
+        if (replaced) {
+          const next = await listRegions();
+          next.sort((a, b) => a.code.localeCompare(b.code));
+          setRegions(next);
+          toast('国勢調査の実データに更新しました');
+        }
+      } catch {
+        // 電波がないときは次回起動時に再試行
+      }
     })();
     return off;
   }, [reloadRecords, toast]);

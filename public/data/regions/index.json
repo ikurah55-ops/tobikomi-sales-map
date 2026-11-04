@@ -7,20 +7,196 @@
       "prefName": "山形県",
       "path": "06/06201.json",
       "dataYear": 2020,
-      "size": 19734,
-      "areaCount": 49,
+      "size": 406957,
+      "areaCount": 498,
       "bbox": [
-        140.29612,
-        38.22393,
-        140.35993,
-        38.27312
+        140.17931,
+        38.14348,
+        140.52987,
+        38.35212
       ],
       "center": [
-        38.24853,
-        140.32802
+        38.2478,
+        140.35459
       ],
-      "isDummy": true,
-      "generatedAt": "2026-11-04T08:39:55.470Z"
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06202",
+      "name": "米沢市",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06202.json",
+      "dataYear": 2020,
+      "size": 354475,
+      "areaCount": 194,
+      "bbox": [
+        139.93496,
+        37.73407,
+        140.29887,
+        37.987
+      ],
+      "center": [
+        37.86053,
+        140.11692
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06203",
+      "name": "鶴岡市",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06203.json",
+      "dataYear": 2020,
+      "size": 786095,
+      "areaCount": 723,
+      "bbox": [
+        139.53965,
+        38.31659,
+        140.03029,
+        38.82661
+      ],
+      "center": [
+        38.5716,
+        139.78497
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06204",
+      "name": "酒田市",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06204.json",
+      "dataYear": 2020,
+      "size": 536883,
+      "areaCount": 546,
+      "bbox": [
+        139.52025,
+        38.77414,
+        140.15107,
+        39.21519
+      ],
+      "center": [
+        38.99466,
+        139.83566
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06205",
+      "name": "新庄市",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06205.json",
+      "dataYear": 2020,
+      "size": 87301,
+      "areaCount": 43,
+      "bbox": [
+        140.19291,
+        38.69732,
+        140.49444,
+        38.90268
+      ],
+      "center": [
+        38.8,
+        140.34368
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06206",
+      "name": "寒河江市",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06206.json",
+      "dataYear": 2020,
+      "size": 146056,
+      "areaCount": 151,
+      "bbox": [
+        140.15012,
+        38.34204,
+        140.32156,
+        38.53568
+      ],
+      "center": [
+        38.43886,
+        140.23584
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06207",
+      "name": "上山市",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06207.json",
+      "dataYear": 2020,
+      "size": 230436,
+      "areaCount": 152,
+      "bbox": [
+        140.18286,
+        38.05327,
+        140.44574,
+        38.22447
+      ],
+      "center": [
+        38.13887,
+        140.3143
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06208",
+      "name": "村山市",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06208.json",
+      "dataYear": 2020,
+      "size": 186814,
+      "areaCount": 161,
+      "bbox": [
+        140.20843,
+        38.45345,
+        140.46362,
+        38.57899
+      ],
+      "center": [
+        38.51622,
+        140.33603
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06209",
+      "name": "長井市",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06209.json",
+      "dataYear": 2020,
+      "size": 179492,
+      "areaCount": 164,
+      "bbox": [
+        139.8775,
+        38.04179,
+        140.10979,
+        38.24657
+      ],
+      "center": [
+        38.14418,
+        139.99365
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
     },
     {
       "code": "06210",
@@ -29,21 +205,571 @@
       "prefName": "山形県",
       "path": "06/06210.json",
       "dataYear": 2020,
-      "size": 14419,
-      "areaCount": 36,
+      "size": 121895,
+      "areaCount": 153,
       "bbox": [
-        140.35047,
-        38.34035,
-        140.4055,
-        38.38223
+        140.30315,
+        38.3104,
+        140.51465,
+        38.40483
       ],
       "center": [
-        38.36129,
-        140.37798
+        38.35761,
+        140.4089
       ],
-      "isDummy": true,
-      "generatedAt": "2026-11-04T08:39:55.470Z"
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06211",
+      "name": "東根市",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06211.json",
+      "dataYear": 2020,
+      "size": 110409,
+      "areaCount": 111,
+      "bbox": [
+        140.3273,
+        38.34981,
+        140.58636,
+        38.48737
+      ],
+      "center": [
+        38.41859,
+        140.45683
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06212",
+      "name": "尾花沢市",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06212.json",
+      "dataYear": 2020,
+      "size": 233657,
+      "areaCount": 114,
+      "bbox": [
+        140.31272,
+        38.43682,
+        140.61983,
+        38.72178
+      ],
+      "center": [
+        38.5793,
+        140.46627
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06213",
+      "name": "南陽市",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06213.json",
+      "dataYear": 2020,
+      "size": 184640,
+      "areaCount": 172,
+      "bbox": [
+        140.06951,
+        38.01944,
+        140.23789,
+        38.22369
+      ],
+      "center": [
+        38.12157,
+        140.1537
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06301",
+      "name": "山辺町",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06301.json",
+      "dataYear": 2020,
+      "size": 36034,
+      "areaCount": 14,
+      "bbox": [
+        140.15198,
+        38.22152,
+        140.28822,
+        38.32886
+      ],
+      "center": [
+        38.27519,
+        140.2201
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06302",
+      "name": "中山町",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06302.json",
+      "dataYear": 2020,
+      "size": 17721,
+      "areaCount": 10,
+      "bbox": [
+        140.20417,
+        38.30588,
+        140.31482,
+        38.3597
+      ],
+      "center": [
+        38.33279,
+        140.2595
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06321",
+      "name": "河北町",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06321.json",
+      "dataYear": 2020,
+      "size": 17596,
+      "areaCount": 7,
+      "bbox": [
+        140.2541,
+        38.37561,
+        140.34712,
+        38.47352
+      ],
+      "center": [
+        38.42457,
+        140.30061
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06322",
+      "name": "西川町",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06322.json",
+      "dataYear": 2020,
+      "size": 65819,
+      "areaCount": 17,
+      "bbox": [
+        139.87483,
+        38.26333,
+        140.20561,
+        38.5469
+      ],
+      "center": [
+        38.40512,
+        140.04022
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06323",
+      "name": "朝日町",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06323.json",
+      "dataYear": 2020,
+      "size": 125021,
+      "areaCount": 59,
+      "bbox": [
+        139.91592,
+        38.1805,
+        140.19888,
+        38.36308
+      ],
+      "center": [
+        38.27179,
+        140.0574
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06324",
+      "name": "大江町",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06324.json",
+      "dataYear": 2020,
+      "size": 60799,
+      "areaCount": 30,
+      "bbox": [
+        139.94501,
+        38.26916,
+        140.26998,
+        38.40781
+      ],
+      "center": [
+        38.33848,
+        140.1075
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06341",
+      "name": "大石田町",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06341.json",
+      "dataYear": 2020,
+      "size": 24856,
+      "areaCount": 12,
+      "bbox": [
+        140.24652,
+        38.54346,
+        140.40393,
+        38.65055
+      ],
+      "center": [
+        38.59701,
+        140.32522
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06361",
+      "name": "金山町",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06361.json",
+      "dataYear": 2020,
+      "size": 103288,
+      "areaCount": 36,
+      "bbox": [
+        140.28054,
+        38.84333,
+        140.49242,
+        38.96503
+      ],
+      "center": [
+        38.90418,
+        140.38648
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06362",
+      "name": "最上町",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06362.json",
+      "dataYear": 2020,
+      "size": 219273,
+      "areaCount": 47,
+      "bbox": [
+        140.38908,
+        38.63383,
+        140.64607,
+        38.90068
+      ],
+      "center": [
+        38.76726,
+        140.51758
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06363",
+      "name": "舟形町",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06363.json",
+      "dataYear": 2020,
+      "size": 44213,
+      "areaCount": 5,
+      "bbox": [
+        140.23328,
+        38.56846,
+        140.45856,
+        38.75162
+      ],
+      "center": [
+        38.66004,
+        140.34592
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06364",
+      "name": "真室川町",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06364.json",
+      "dataYear": 2020,
+      "size": 76677,
+      "areaCount": 10,
+      "bbox": [
+        140.11002,
+        38.83307,
+        140.45368,
+        39.06158
+      ],
+      "center": [
+        38.94732,
+        140.28185
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06365",
+      "name": "大蔵村",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06365.json",
+      "dataYear": 2020,
+      "size": 88532,
+      "areaCount": 27,
+      "bbox": [
+        140.0354,
+        38.49329,
+        140.26555,
+        38.72432
+      ],
+      "center": [
+        38.60881,
+        140.15048
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06366",
+      "name": "鮭川村",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06366.json",
+      "dataYear": 2020,
+      "size": 71225,
+      "areaCount": 52,
+      "bbox": [
+        140.0877,
+        38.76521,
+        140.31353,
+        38.87468
+      ],
+      "center": [
+        38.81995,
+        140.20061
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06367",
+      "name": "戸沢村",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06367.json",
+      "dataYear": 2020,
+      "size": 115270,
+      "areaCount": 40,
+      "bbox": [
+        140.02875,
+        38.61418,
+        140.21578,
+        38.82087
+      ],
+      "center": [
+        38.71752,
+        140.12226
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06381",
+      "name": "高畠町",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06381.json",
+      "dataYear": 2020,
+      "size": 206880,
+      "areaCount": 134,
+      "bbox": [
+        140.11046,
+        37.89598,
+        140.29003,
+        38.08248
+      ],
+      "center": [
+        37.98923,
+        140.20024
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06382",
+      "name": "川西町",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06382.json",
+      "dataYear": 2020,
+      "size": 63580,
+      "areaCount": 23,
+      "bbox": [
+        139.92177,
+        37.8748,
+        140.13661,
+        38.06662
+      ],
+      "center": [
+        37.97071,
+        140.02919
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06401",
+      "name": "小国町",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06401.json",
+      "dataYear": 2020,
+      "size": 233649,
+      "areaCount": 88,
+      "bbox": [
+        139.62415,
+        37.83053,
+        139.92314,
+        38.27618
+      ],
+      "center": [
+        38.05335,
+        139.77364
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06402",
+      "name": "白鷹町",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06402.json",
+      "dataYear": 2020,
+      "size": 138655,
+      "areaCount": 112,
+      "bbox": [
+        139.97777,
+        38.12857,
+        140.1737,
+        38.2701
+      ],
+      "center": [
+        38.19934,
+        140.07574
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06403",
+      "name": "飯豊町",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06403.json",
+      "dataYear": 2020,
+      "size": 209001,
+      "areaCount": 85,
+      "bbox": [
+        139.73205,
+        37.80322,
+        140.03627,
+        38.10733
+      ],
+      "center": [
+        37.95528,
+        139.88416
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06426",
+      "name": "三川町",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06426.json",
+      "dataYear": 2020,
+      "size": 57195,
+      "areaCount": 75,
+      "bbox": [
+        139.80961,
+        38.74654,
+        139.88949,
+        38.84074
+      ],
+      "center": [
+        38.79364,
+        139.84955
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06428",
+      "name": "庄内町",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06428.json",
+      "dataYear": 2020,
+      "size": 140801,
+      "areaCount": 121,
+      "bbox": [
+        139.84742,
+        38.5276,
+        140.11738,
+        38.88552
+      ],
+      "center": [
+        38.70656,
+        139.9824
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
+    },
+    {
+      "code": "06461",
+      "name": "遊佐町",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06461.json",
+      "dataYear": 2020,
+      "size": 133586,
+      "areaCount": 123,
+      "bbox": [
+        139.84039,
+        38.97572,
+        140.0672,
+        39.13357
+      ],
+      "center": [
+        39.05465,
+        139.9538
+      ],
+      "isDummy": false,
+      "generatedAt": "2026-11-04T12:13:34.855Z"
     }
   ],
-  "generatedAt": "2026-11-04T08:39:55.470Z"
+  "generatedAt": "2026-11-04T12:13:34.855Z"
 }

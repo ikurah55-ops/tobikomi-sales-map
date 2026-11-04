@@ -5,6 +5,7 @@ import { downloadRegion, fetchRegionIndex, formatSize, hasUpdate, type RegionInd
 import { deleteRegion } from '../data/repository';
 import { PREFECTURES } from '../lib/prefectures';
 import { INDICATOR_KEYS, INDICATOR_LABEL, PRESETS, adjustWeights, ageRangeLabel } from '../lib/score';
+import { isStandalone, useInstallPrompt } from '../hooks/useInstallPrompt';
 import { useStore } from '../store';
 import type { IndicatorKey, RegionIndexEntry } from '../types';
 
@@ -18,6 +19,7 @@ export function SettingsPage() {
   const [pref, setPref] = useState('06');
   const [busy, setBusy] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const { canInstall, install: installApp } = useInstallPrompt();
 
   const loadIndex = () => {
     setIndexError(null);
@@ -234,6 +236,24 @@ export function SettingsPage() {
         />
         <p className="muted small">復元すると、同じ記録は上書きされ、ない記録は追加されます(今ある記録は消えません)。</p>
       </section>
+
+      {!isStandalone() && (
+        <section className="panel">
+          <h3>アプリとして使う</h3>
+          {canInstall ? (
+            <button
+              className="btn btn-primary btn-block"
+              onClick={async () => { if (await installApp()) toast('ホーム画面に追加しました'); }}
+            >
+              ホーム画面にインストール
+            </button>
+          ) : (
+            <p className="muted small">
+              Chromeの「⋮ → アプリをインストール」から追加できます。「既にインストールされています」と出る場合は、ホーム画面の古いショートカットを削除してから試してください(訪問記録は消えません)。
+            </p>
+          )}
+        </section>
+      )}
 
       <section className="panel about">
         <h3>プライバシーと出典</h3>

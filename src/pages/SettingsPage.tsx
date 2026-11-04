@@ -52,7 +52,7 @@ export function SettingsPage() {
 
   const prefsWithData = new Set(index?.regions.map((r) => r.prefCode));
   const cities = index?.regions.filter((r) => r.prefCode === pref) ?? [];
-  // 前処理で実データに合わせて変えた点(女性の非就業率・持ち家一戸建て率の近似など)
+  // 前処理で実データに合わせて変えた点(持ち家一戸建て率の近似など)
   const dataNotes = activeRegion?.data.notes ?? [];
 
   return (
@@ -94,7 +94,7 @@ export function SettingsPage() {
           {Array.from({ length: AGE_MAX - AGE_MIN + 1 }, (_, i) => <span key={i}>{(AGE_MIN + i) * 5}</span>)}
         </div>
         <p className="muted small">
-          年齢の設定は「狙う年齢層の人口割合」の指標にだけ反映します。ほかの指標(家族類型・女性の非就業率・持ち家・人口増加率)は統計の都合で年齢と連動できないため固定で計算しています
+          年齢の設定は「狙う年齢層の人口割合」の指標にだけ反映します。ほかの指標(家族類型・子どもがいる世帯・持ち家・人口増加率)は統計の都合で年齢と連動できないため固定で計算しています
           。
         </p>
         {dataNotes.map((n) => <p key={n} className="muted small">※ {n}</p>)}

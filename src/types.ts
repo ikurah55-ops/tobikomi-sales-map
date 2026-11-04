@@ -12,8 +12,7 @@ export interface AreaProps {
   age: (number | null)[]; // 5歳階級 18区分(0〜4歳 … 85歳以上)
   gen: number | null; // 一般世帯数
   cc: number | null; // 夫婦と子どもから成る世帯
-  fT: number | null; // 女性人口(労働力状態の母数)
-  fE: number | null; // 女性就業者
+  k18: number | null; // 18歳未満世帯員のいる一般世帯
   main: number | null; // 主世帯数
   od: number | null; // 持ち家の一戸建て
   ins?: boolean; // データ不足
@@ -49,7 +48,6 @@ export interface RegionFile extends FeatureCollection<Polygon | MultiPolygon, Ar
   dataYear: number;
   source: string;
   isDummy?: boolean;
-  femaleAgeRange: string;
   notes: string[];
   generatedAt: string;
   bbox: [number, number, number, number];
@@ -99,7 +97,7 @@ export interface Visit {
 
 // ---------- 設定 ----------
 
-export type IndicatorKey = 'family' | 'age' | 'femaleNonWork' | 'ownedDetached' | 'growth';
+export type IndicatorKey = 'family' | 'age' | 'kids' | 'ownedDetached' | 'growth';
 export type Weights = Record<IndicatorKey, number>;
 export type CompareScope = 'region' | 'all';
 

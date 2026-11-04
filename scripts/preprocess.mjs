@@ -198,12 +198,6 @@ if (flag('inspect')) {
 console.log(`前処理: raw=${rawDir} 県=${prefArg}${onlyCity ? ` 市区町村=${onlyCity}` : '(県内すべて)'}${isDummy ? ' [ダミー]' : ''}`);
 const T = {};
 for (const [name, def] of Object.entries(config.tables)) T[name] = readTable(name, def);
-const laborRange = config.tables.labor ? config.tables.labor.ageRange ?? '15+' : 'none';
-if (laborRange === 'none') {
-  notes.push('小地域集計に男女別の就業者数がないため、女性の非就業率は計算していません(重みは他の指標に按分されます)');
-} else if (laborRange !== '25-54') {
-  notes.push(`女性の非就業率は小地域集計に年齢別の労働力状態がないため「女性${laborRange === '15+' ? '15歳以上' : laborRange}」で計算しています(仕様は25〜54歳)`);
-}
 if (config.tables.housingOwn) {
   notes.push('持ち家と住宅の建て方の掛け合わせ表がないため、持ち家一戸建て率は「持ち家率 × 一戸建て率」で近似しています');
 }
@@ -231,13 +225,13 @@ for (const f of boundary.features) {
   const pop = T.population.get(key);
   const hh = T.households.get(key);
   const fam = T.family?.get(key) ?? hh; // 家族類型が別の表のとき
-  const lab = T.labor?.get(key);
+
   const hou = T.housing.get(key);
   const own = T.housingOwn?.get(key); // 住宅の所有の関係が別の表のとき
   const p15 = T.population2015?.get(key);
 
   const households = hh?.households ?? null;
-  const hidden = [pop, hh, fam, lab, hou, own].some((r) => r?.hidden);
+  const hidden = [pop, hh, fam, hou, own].some((r) => r?.hidden);
   let od = hou?.ownedDetached ?? null;
   if (od == null && own && hou?.detached != null && own.owned != null && own.ownTotal > 0) {
     od = Math.round(hou.detached * (own.owned / own.ownTotal));
@@ -269,8 +263,7 @@ for (const f of boundary.features) {
     age: ages,
     gen: fam?.general ?? null,
     cc: fam?.coupleChild ?? null,
-    fT: lab?.femaleTotal ?? null,
-    fE: lab?.femaleEmployed ?? null,
+    k18: fam?.kids18 ?? null,
     main: hou?.main ?? null,
     od,
   };
@@ -301,7 +294,7 @@ for (const c of byCity.values()) {
   const file = join(outDir, rel);
   mkdirSync(dirname(file), { recursive: true });
   const region = {
-    format: 1,
+    format: 2,
     code: c.code,
     name: c.name,
     prefCode: c.prefCode,
@@ -309,7 +302,6 @@ for (const c of byCity.values()) {
     dataYear: config.dataYear,
     source: config.source,
     isDummy,
-    femaleAgeRange: laborRange,
     notes,
     generatedAt,
     bbox,

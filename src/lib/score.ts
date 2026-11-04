@@ -1,25 +1,25 @@
 import type { AreaFeature, IndicatorKey, Settings, Weights } from '../types';
 
-export const INDICATOR_KEYS: IndicatorKey[] = ['family', 'age', 'femaleNonWork', 'ownedDetached', 'growth'];
+export const INDICATOR_KEYS: IndicatorKey[] = ['family', 'age', 'kids', 'ownedDetached', 'growth'];
 
 export const INDICATOR_LABEL: Record<IndicatorKey, string> = {
   family: '夫婦と子どもの世帯の割合',
   age: '狙う年齢層の人口割合',
-  femaleNonWork: '女性の非就業率',
+  kids: '18歳未満の子がいる世帯の割合',
   ownedDetached: '持ち家一戸建て率',
   growth: '人口増加率',
 };
 
 /** 理由の文に使う短い名前 */
 const REASON_LABEL: Record<IndicatorKey, string> = {
-  family: '子育て世帯の割合',
+  family: '夫婦と子の世帯の割合',
   age: '狙う年齢層の割合',
-  femaleNonWork: '女性の非就業率',
+  kids: '子どもがいる世帯の割合',
   ownedDetached: '持ち家一戸建て率',
   growth: '人口増加率',
 };
 
-export const DEFAULT_WEIGHTS: Weights = { family: 30, age: 20, femaleNonWork: 20, ownedDetached: 15, growth: 15 };
+export const DEFAULT_WEIGHTS: Weights = { family: 30, age: 20, kids: 20, ownedDetached: 15, growth: 15 };
 
 export interface Preset {
   id: string;
@@ -31,9 +31,9 @@ export interface Preset {
 
 export const PRESETS: Preset[] = [
   { id: 'standard', label: '標準', ageFrom: 6, ageTo: 8, weights: DEFAULT_WEIGHTS },
-  { id: 'child', label: '子育て世代', ageFrom: 6, ageTo: 8, weights: { family: 40, age: 20, femaleNonWork: 20, ownedDetached: 10, growth: 10 } },
-  { id: 'young', label: '新婚・若年層', ageFrom: 5, ageTo: 6, weights: { family: 20, age: 30, femaleNonWork: 15, ownedDetached: 10, growth: 25 } },
-  { id: 'review', label: '見直し世代', ageFrom: 9, ageTo: 11, weights: { family: 20, age: 25, femaleNonWork: 10, ownedDetached: 35, growth: 10 } },
+  { id: 'child', label: '子育て世代', ageFrom: 6, ageTo: 8, weights: { family: 40, age: 20, kids: 20, ownedDetached: 10, growth: 10 } },
+  { id: 'young', label: '新婚・若年層', ageFrom: 5, ageTo: 6, weights: { family: 20, age: 30, kids: 15, ownedDetached: 10, growth: 25 } },
+  { id: 'review', label: '見直し世代', ageFrom: 9, ageTo: 11, weights: { family: 20, age: 25, kids: 10, ownedDetached: 35, growth: 10 } },
 ];
 
 /** 5歳階級のインデックス → 「30〜34歳」 */
@@ -75,7 +75,7 @@ function fractions(p: AreaFeature['properties'], ageFrom: number, ageTo: number)
   return {
     family: frac(p.cc, p.gen),
     age: frac(ageSum, p.pop),
-    femaleNonWork: p.fT != null && p.fE != null && p.fT > 0 ? { num: p.fT - p.fE, den: p.fT } : null,
+    kids: frac(p.k18, p.gen),
     ownedDetached: frac(p.od, p.main),
     // 増加率は「2020年 − 2015年」/ 2015年
     growth: p.pop != null && p.pop15 != null && p.pop15 > 0 ? { num: p.pop - p.pop15, den: p.pop15 } : null,
@@ -112,7 +112,7 @@ export interface ScoreInput {
 }
 
 function emptyRecord<T>(v: T): Record<IndicatorKey, T> {
-  return { family: v, age: v, femaleNonWork: v, ownedDetached: v, growth: v };
+  return { family: v, age: v, kids: v, ownedDetached: v, growth: v };
 }
 
 /** パーセンタイル(0〜100)。同じ値は平均順位 */

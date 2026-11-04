@@ -49,7 +49,7 @@ const AGE_BANDS = 18; // 0-4 … 85+
 
 const features = [];
 const features2015 = [];
-const rows = { pop: [], pop15: [], hh: [], labor: [], housing: [] };
+const rows = { pop: [], pop15: [], hh: [], housing: [] };
 
 for (const c of CITIES) {
   // 格子点を少しずらして町丁目らしい不揃いな区画にする
@@ -119,11 +119,9 @@ for (const c of CITIES) {
 
       const general = Math.max(hh - round(between(0, 5)), 0);
       const coupleChild = round(general * Math.min(0.55, 0.12 + suburb * between(0.18, 0.32)));
-      rows.hh.push([key, '3', c.cityName, name, secret ? '1' : '', '', '', v(hh), v(general), v(coupleChild)]);
+      const kids18 = Math.min(general, round(coupleChild * between(0.75, 0.95) + general * between(0.02, 0.06)));
+      rows.hh.push([key, '3', c.cityName, name, secret ? '1' : '', '', '', v(hh), v(general), v(coupleChild), v(kids18)]);
 
-      const female = round(total * 0.52 * 0.88);
-      const femaleEmployed = round(female * between(0.42, 0.62) * (1.05 - suburb * 0.12));
-      rows.labor.push([key, '3', c.cityName, name, secret ? '1' : '', '', '', v(female), v(femaleEmployed)]);
 
       const main = Math.max(general - round(between(0, 3)), 0);
       const owned = round(main * Math.min(0.92, 0.18 + suburb * between(0.4, 0.62)));
@@ -146,8 +144,7 @@ for (let b = 0; b < AGE_BANDS; b++) {
 }
 writeTable('population2020-06.txt', 'T001082', ['総数、年齢「不詳」含む', ...ageLabels], rows.pop);
 writeTable('population2015-06.txt', 'T000849', ['人口総数'], rows.pop15);
-writeTable('households-06.txt', 'T001086', ['世帯総数', '一般世帯総数', '夫婦と子供から成る世帯'], rows.hh);
-writeTable('labor-06.txt', 'T001090', ['女総数', '女就業者'], rows.labor);
+writeTable('households-06.txt', 'T001086', ['世帯総数', '一般世帯総数', '夫婦と子供から成る世帯', '18歳未満世帯員のいる一般世帯総数'], rows.hh);
 writeTable('housing-06.txt', 'T001100', ['主世帯総数', '持ち家一戸建'], rows.housing);
 
 writeFileSync(join(OUT, 'boundary-06.geojson'), JSON.stringify({ type: 'FeatureCollection', features }));

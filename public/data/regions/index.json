@@ -7,7 +7,7 @@
       "prefName": "山形県",
       "path": "06/06201.json",
       "dataYear": 2020,
-      "size": 406957,
+      "size": 401307,
       "areaCount": 498,
       "bbox": [
         140.17931,
@@ -20,7 +20,7 @@
         140.35459
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06202",
@@ -29,7 +29,7 @@
       "prefName": "山形県",
       "path": "06/06202.json",
       "dataYear": 2020,
-      "size": 354475,
+      "size": 352163,
       "areaCount": 194,
       "bbox": [
         139.93496,
@@ -42,7 +42,7 @@
         140.11692
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06203",
@@ -51,7 +51,7 @@
       "prefName": "山形県",
       "path": "06/06203.json",
       "dataYear": 2020,
-      "size": 786095,
+      "size": 777937,
       "areaCount": 723,
       "bbox": [
         139.53965,
@@ -64,7 +64,7 @@
         139.78497
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06204",
@@ -73,7 +73,7 @@
       "prefName": "山形県",
       "path": "06/06204.json",
       "dataYear": 2020,
-      "size": 536883,
+      "size": 530736,
       "areaCount": 546,
       "bbox": [
         139.52025,
@@ -86,7 +86,7 @@
         139.83566
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06205",
@@ -95,7 +95,7 @@
       "prefName": "山形県",
       "path": "06/06205.json",
       "dataYear": 2020,
-      "size": 87301,
+      "size": 86658,
       "areaCount": 43,
       "bbox": [
         140.19291,
@@ -108,7 +108,7 @@
         140.34368
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06206",
@@ -117,7 +117,7 @@
       "prefName": "山形県",
       "path": "06/06206.json",
       "dataYear": 2020,
-      "size": 146056,
+      "size": 144223,
       "areaCount": 151,
       "bbox": [
         140.15012,
@@ -130,7 +130,7 @@
         140.23584
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06207",
@@ -139,7 +139,7 @@
       "prefName": "山形県",
       "path": "06/06207.json",
       "dataYear": 2020,
-      "size": 230436,
+      "size": 228574,
       "areaCount": 152,
       "bbox": [
         140.18286,
@@ -152,7 +152,7 @@
         140.3143
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06208",
@@ -161,7 +161,7 @@
       "prefName": "山形県",
       "path": "06/06208.json",
       "dataYear": 2020,
-      "size": 186814,
+      "size": 184829,
       "areaCount": 161,
       "bbox": [
         140.20843,
@@ -174,7 +174,7 @@
         140.33603
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06209",
@@ -183,7 +183,7 @@
       "prefName": "山形県",
       "path": "06/06209.json",
       "dataYear": 2020,
-      "size": 179492,
+      "size": 177468,
       "areaCount": 164,
       "bbox": [
         139.8775,
@@ -196,7 +196,7 @@
         139.99365
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06210",
@@ -205,7 +205,7 @@
       "prefName": "山形県",
       "path": "06/06210.json",
       "dataYear": 2020,
-      "size": 121895,
+      "size": 120053,
       "areaCount": 153,
       "bbox": [
         140.30315,
@@ -218,7 +218,7 @@
         140.4089
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06211",
@@ -227,7 +227,7 @@
       "prefName": "山形県",
       "path": "06/06211.json",
       "dataYear": 2020,
-      "size": 110409,
+      "size": 109010,
       "areaCount": 111,
       "bbox": [
         140.3273,
@@ -240,7 +240,7 @@
         140.45683
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06212",
@@ -249,7 +249,7 @@
       "prefName": "山形県",
       "path": "06/06212.json",
       "dataYear": 2020,
-      "size": 233657,
+      "size": 232195,
       "areaCount": 114,
       "bbox": [
         140.31272,
@@ -262,7 +262,7 @@
         140.46627
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06213",
@@ -271,7 +271,7 @@
       "prefName": "山形県",
       "path": "06/06213.json",
       "dataYear": 2020,
-      "size": 184640,
+      "size": 182522,
       "areaCount": 172,
       "bbox": [
         140.06951,
@@ -284,7 +284,7 @@
         140.1537
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06301",
@@ -293,7 +293,7 @@
       "prefName": "山形県",
       "path": "06/06301.json",
       "dataYear": 2020,
-      "size": 36034,
+      "size": 35701,
       "areaCount": 14,
       "bbox": [
         140.15198,
@@ -306,7 +306,7 @@
         140.2201
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06302",
@@ -315,7 +315,7 @@
       "prefName": "山形県",
       "path": "06/06302.json",
       "dataYear": 2020,
-      "size": 17721,
+      "size": 17433,
       "areaCount": 10,
       "bbox": [
         140.20417,
@@ -328,7 +328,7 @@
         140.2595
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06321",
@@ -337,7 +337,7 @@
       "prefName": "山形県",
       "path": "06/06321.json",
       "dataYear": 2020,
-      "size": 17596,
+      "size": 17343,
       "areaCount": 7,
       "bbox": [
         140.2541,
@@ -350,7 +350,7 @@
         140.30061
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06322",
@@ -359,7 +359,7 @@
       "prefName": "山形県",
       "path": "06/06322.json",
       "dataYear": 2020,
-      "size": 65819,
+      "size": 65446,
       "areaCount": 17,
       "bbox": [
         139.87483,
@@ -372,7 +372,7 @@
         140.04022
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06323",
@@ -381,7 +381,7 @@
       "prefName": "山形県",
       "path": "06/06323.json",
       "dataYear": 2020,
-      "size": 125021,
+      "size": 124164,
       "areaCount": 59,
       "bbox": [
         139.91592,
@@ -394,7 +394,7 @@
         140.0574
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06324",
@@ -403,7 +403,7 @@
       "prefName": "山形県",
       "path": "06/06324.json",
       "dataYear": 2020,
-      "size": 60799,
+      "size": 60287,
       "areaCount": 30,
       "bbox": [
         139.94501,
@@ -416,7 +416,7 @@
         140.1075
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06341",
@@ -425,7 +425,7 @@
       "prefName": "山形県",
       "path": "06/06341.json",
       "dataYear": 2020,
-      "size": 24856,
+      "size": 24542,
       "areaCount": 12,
       "bbox": [
         140.24652,
@@ -438,7 +438,7 @@
         140.32522
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06361",
@@ -447,7 +447,7 @@
       "prefName": "山形県",
       "path": "06/06361.json",
       "dataYear": 2020,
-      "size": 103288,
+      "size": 102705,
       "areaCount": 36,
       "bbox": [
         140.28054,
@@ -460,7 +460,7 @@
         140.38648
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06362",
@@ -469,7 +469,7 @@
       "prefName": "山形県",
       "path": "06/06362.json",
       "dataYear": 2020,
-      "size": 219273,
+      "size": 218558,
       "areaCount": 47,
       "bbox": [
         140.38908,
@@ -482,7 +482,7 @@
         140.51758
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06363",
@@ -491,7 +491,7 @@
       "prefName": "山形県",
       "path": "06/06363.json",
       "dataYear": 2020,
-      "size": 44213,
+      "size": 43980,
       "areaCount": 5,
       "bbox": [
         140.23328,
@@ -504,7 +504,7 @@
         140.34592
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06364",
@@ -513,7 +513,7 @@
       "prefName": "山形県",
       "path": "06/06364.json",
       "dataYear": 2020,
-      "size": 76677,
+      "size": 76388,
       "areaCount": 10,
       "bbox": [
         140.11002,
@@ -526,7 +526,7 @@
         140.28185
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06365",
@@ -535,7 +535,7 @@
       "prefName": "山形県",
       "path": "06/06365.json",
       "dataYear": 2020,
-      "size": 88532,
+      "size": 88048,
       "areaCount": 27,
       "bbox": [
         140.0354,
@@ -548,7 +548,7 @@
         140.15048
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06366",
@@ -557,7 +557,7 @@
       "prefName": "山形県",
       "path": "06/06366.json",
       "dataYear": 2020,
-      "size": 71225,
+      "size": 70450,
       "areaCount": 52,
       "bbox": [
         140.0877,
@@ -570,7 +570,7 @@
         140.20061
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06367",
@@ -579,7 +579,7 @@
       "prefName": "山形県",
       "path": "06/06367.json",
       "dataYear": 2020,
-      "size": 115270,
+      "size": 114652,
       "areaCount": 40,
       "bbox": [
         140.02875,
@@ -592,7 +592,7 @@
         140.12226
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06381",
@@ -601,7 +601,7 @@
       "prefName": "山形県",
       "path": "06/06381.json",
       "dataYear": 2020,
-      "size": 206880,
+      "size": 205194,
       "areaCount": 134,
       "bbox": [
         140.11046,
@@ -614,7 +614,7 @@
         140.20024
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06382",
@@ -623,7 +623,7 @@
       "prefName": "山形県",
       "path": "06/06382.json",
       "dataYear": 2020,
-      "size": 63580,
+      "size": 63149,
       "areaCount": 23,
       "bbox": [
         139.92177,
@@ -636,7 +636,7 @@
         140.02919
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06401",
@@ -645,7 +645,7 @@
       "prefName": "山形県",
       "path": "06/06401.json",
       "dataYear": 2020,
-      "size": 233649,
+      "size": 232504,
       "areaCount": 88,
       "bbox": [
         139.62415,
@@ -658,7 +658,7 @@
         139.77364
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06402",
@@ -667,7 +667,7 @@
       "prefName": "山形県",
       "path": "06/06402.json",
       "dataYear": 2020,
-      "size": 138655,
+      "size": 137191,
       "areaCount": 112,
       "bbox": [
         139.97777,
@@ -680,7 +680,7 @@
         140.07574
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06403",
@@ -689,7 +689,7 @@
       "prefName": "山形県",
       "path": "06/06403.json",
       "dataYear": 2020,
-      "size": 209001,
+      "size": 207869,
       "areaCount": 85,
       "bbox": [
         139.73205,
@@ -702,7 +702,7 @@
         139.88416
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06426",
@@ -711,7 +711,7 @@
       "prefName": "山形県",
       "path": "06/06426.json",
       "dataYear": 2020,
-      "size": 57195,
+      "size": 56186,
       "areaCount": 75,
       "bbox": [
         139.80961,
@@ -724,7 +724,7 @@
         139.84955
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06428",
@@ -733,7 +733,7 @@
       "prefName": "山形県",
       "path": "06/06428.json",
       "dataYear": 2020,
-      "size": 140801,
+      "size": 139252,
       "areaCount": 121,
       "bbox": [
         139.84742,
@@ -746,7 +746,7 @@
         139.9824
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     },
     {
       "code": "06461",
@@ -755,7 +755,7 @@
       "prefName": "山形県",
       "path": "06/06461.json",
       "dataYear": 2020,
-      "size": 133586,
+      "size": 131998,
       "areaCount": 123,
       "bbox": [
         139.84039,
@@ -768,8 +768,8 @@
         139.9538
       ],
       "isDummy": false,
-      "generatedAt": "2026-11-04T12:13:34.855Z"
+      "generatedAt": "2026-11-04T22:56:54.312Z"
     }
   ],
-  "generatedAt": "2026-11-04T12:13:34.855Z"
+  "generatedAt": "2026-11-04T22:56:54.312Z"
 }

@@ -23,26 +23,36 @@
   "tables": {
     "population": {
       "file": "population2020-{pref}.txt",
-      "columns": { "total": "^総数(、年齢「不詳」含む)?$" },
-      "ageBands": { "template": "^総数{from}~{to}歳$", "last": "^総数85歳以上$" }
+      "columns": {
+        "total": "^総数(、年齢「不詳」含む)?$"
+      },
+      "ageBands": {
+        "template": "^総数{from}~{to}歳$",
+        "last": "^総数85歳以上$"
+      }
     },
     "population2015": {
       "file": "population2015-{pref}.txt",
       "optional": true,
-      "columns": { "total": "^(人口)?総数$" }
+      "columns": {
+        "total": "^(人口)?総数$"
+      }
     },
     "households": {
       "file": "households-{pref}.txt",
-      "columns": { "households": "^世帯総数$", "general": "^一般世帯総数$", "coupleChild": "夫婦と子供から成る世帯$" }
-    },
-    "labor": {
-      "file": "labor-{pref}.txt",
-      "ageRange": "15+",
-      "columns": { "femaleTotal": "^女(総数|15歳以上人口)$", "femaleEmployed": "^女就業者$" }
+      "columns": {
+        "households": "^世帯総数$",
+        "general": "^一般世帯総数$",
+        "coupleChild": "夫婦と子供から成る世帯$",
+        "kids18": "^18歳未満世帯員のいる一般世帯総数$"
+      }
     },
     "housing": {
       "file": "housing-{pref}.txt",
-      "columns": { "main": "^主世帯総数$", "ownedDetached": "^持ち家一戸建$" }
+      "columns": {
+        "main": "^主世帯総数$",
+        "ownedDetached": "^持ち家一戸建$"
+      }
     }
   }
 }

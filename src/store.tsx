@@ -4,7 +4,10 @@ import { downloadRegion, fetchRegionIndex } from './data/regions';
 import { listPins, listRegions, listVisits, loadSettings, onRecordsChange, requestPersistentStorage, storeSettings } from './data/repository';
 import { DEFAULT_FILTER } from './lib/records';
 import { DEFAULT_WEIGHTS, scoreGroup, type AreaScore, type ScoreGroup } from './lib/score';
-import type { Pin, Settings, StoredRegion, Visit } from './types';
+import type { Pin, Settings, StoredRegion, Visit, Weights } from './types';
+
+/** 前処理(scripts/preprocess.mjs)が出力する地域データの形式番号。これより古い保存データは自動で取り直す */
+const REGION_FORMAT = 2;
 
 export type Tab = 'map' | 'ranking' | 'analysis' | 'settings';
 
@@ -56,7 +59,11 @@ const unitOf = (name: string) => (/[市町村区]$/.test(name) ? name.slice(-1) 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>(() => {
     const saved = loadSettings();
-    return { ...DEFAULT_SETTINGS, ...saved, filter: { ...DEFAULT_FILTER, ...saved?.filter } };
+    // 旧版の「女性の非就業率」の重みは、代わりの「子どもがいる世帯の割合」に引き継ぐ
+    const w = saved?.weights as (Partial<Weights> & { femaleNonWork?: number }) | undefined;
+    const weights = w && w.kids == null ? { ...DEFAULT_WEIGHTS, ...w, kids: w.femaleNonWork ?? DEFAULT_WEIGHTS.kids } : saved?.weights;
+    if (weights) delete (weights as { femaleNonWork?: number }).femaleNonWork;
+    return { ...DEFAULT_SETTINGS, ...saved, ...(weights && { weights }), filter: { ...DEFAULT_FILTER, ...saved?.filter } };
   });
   const [regions, setRegions] = useState<StoredRegion[]>([]);
   const [regionsLoaded, setRegionsLoaded] = useState(false);
@@ -116,8 +123,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setRegions(r);
       setRegionsLoaded(true);
 
-      // ダミーデータの地域は、実データが公開されていれば自動で入れ替える
-      const dummies = r.filter((x) => x.isDummy);
+      // ダミーデータや古い形式(子どもがいる世帯の列がない)の地域は、公開中のデータで自動で入れ替える
+      const dummies = r.filter((x) => x.isDummy || x.data.format < REGION_FORMAT);
       if (!dummies.length) return;
       try {
         const index = await fetchRegionIndex();
@@ -133,7 +140,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           const next = await listRegions();
           next.sort((a, b) => a.code.localeCompare(b.code));
           setRegions(next);
-          toast('国勢調査の実データに更新しました');
+          toast('地域データを最新の国勢調査データに更新しました');
         }
       } catch {
         // 電波がないときは次回起動時に再試行

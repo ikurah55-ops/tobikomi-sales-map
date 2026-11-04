@@ -19,10 +19,12 @@ export default defineConfig({
         lang: 'ja',
         theme_color: '#1b3a6b',
         background_color: '#ffffff',
+        // id を変えると端末からは別アプリ扱いになる(Androidでインストールが壊れたときに v を上げる)
+        id: `${base}?app=v2`,
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '.',
-        scope: '.',
+        start_url: base,
+        scope: base,
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },

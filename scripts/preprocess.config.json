@@ -1,0 +1,67 @@
+{
+  "$comment": "e-Stat 令和2年国勢調査 小地域集計(実データ)用の設定。{pref} は都道府県コード(2桁)に置き換わる。列は2行目の日本語見出しを正規表現で探す(全角数字・波ダッシュは半角に正規化してから比較)。実データと見出しが違ったら npm run data:inspect で見出しを確認し、ここを書き換える。",
+  "dataYear": 2020,
+  "source": "総務省統計局「令和2年国勢調査 小地域集計」「平成27年国勢調査 小地域集計」、e-Stat 境界データ(町丁・字等別)を加工して作成",
+  "minHouseholds": 30,
+  "boundary": {
+    "file": "r2ka{pref}.shp",
+    "encoding": "sjis",
+    "keyField": "KEY_CODE",
+    "prefField": "PREF",
+    "cityField": "CITY",
+    "prefNameField": "PREF_NAME",
+    "cityNameField": "CITY_NAME",
+    "nameField": "S_NAME",
+    "areaField": "AREA",
+    "filter": "HCODE == 8101",
+    "simplify": "15%"
+  },
+  "boundary2015": {
+    "file": "h27ka{pref}.shp",
+    "encoding": "sjis",
+    "keyField": "KEY_CODE",
+    "areaField": "AREA",
+    "areaTolerance": 0.02
+  },
+  "tables": {
+    "population": {
+      "file": "tblT001082C{pref}.txt",
+      "columns": {
+        "total": "^総数(、年齢「不詳」含む)?$"
+      },
+      "ageBands": {
+        "template": "^総数{from}~{to}歳$",
+        "last": "^総数85歳以上$"
+      }
+    },
+    "population2015": {
+      "file": "tblT000849C{pref}.txt",
+      "optional": true,
+      "columns": { "total": "^(人口)?総数$" }
+    },
+    "households": {
+      "file": "tblT001086C{pref}.txt",
+      "columns": {
+        "households": "^世帯総数$",
+        "general": "^一般世帯総数$",
+        "coupleChild": "夫婦と子供から成る世帯$"
+      }
+    },
+    "labor": {
+      "file": "tblT001090C{pref}.txt",
+      "$comment": "小地域集計の労働力状態に年齢別がない場合は女性15歳以上で計算する。年齢別の列がある場合は ageRange を '25-54' にし、列の正規表現を変える",
+      "ageRange": "15+",
+      "columns": {
+        "femaleTotal": "^女(総数|15歳以上人口)$",
+        "femaleEmployed": "^女就業者$"
+      }
+    },
+    "housing": {
+      "file": "tblT001100C{pref}.txt",
+      "columns": {
+        "main": "^主世帯総数$",
+        "ownedDetached": "^持ち家一戸建$"
+      }
+    }
+  }
+}

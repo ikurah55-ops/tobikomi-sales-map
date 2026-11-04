@@ -1,0 +1,49 @@
+{
+  "regions": [
+    {
+      "code": "06201",
+      "name": "山形市",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06201.json",
+      "dataYear": 2020,
+      "size": 19734,
+      "areaCount": 49,
+      "bbox": [
+        140.29612,
+        38.22393,
+        140.35993,
+        38.27312
+      ],
+      "center": [
+        38.24853,
+        140.32802
+      ],
+      "isDummy": true,
+      "generatedAt": "2026-11-04T08:39:55.470Z"
+    },
+    {
+      "code": "06210",
+      "name": "天童市",
+      "prefCode": "06",
+      "prefName": "山形県",
+      "path": "06/06210.json",
+      "dataYear": 2020,
+      "size": 14419,
+      "areaCount": 36,
+      "bbox": [
+        140.35047,
+        38.34035,
+        140.4055,
+        38.38223
+      ],
+      "center": [
+        38.36129,
+        140.37798
+      ],
+      "isDummy": true,
+      "generatedAt": "2026-11-04T08:39:55.470Z"
+    }
+  ],
+  "generatedAt": "2026-11-04T08:39:55.470Z"
+}

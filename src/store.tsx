@@ -1,0 +1,170 @@
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { DEFAULT_REGION } from './config';
+import { downloadRegion, fetchRegionIndex } from './data/regions';
+import { listPins, listRegions, listVisits, loadSettings, onRecordsChange, requestPersistentStorage, storeSettings } from './data/repository';
+import { DEFAULT_FILTER } from './lib/records';
+import { DEFAULT_WEIGHTS, scoreGroup, type AreaScore, type ScoreGroup } from './lib/score';
+import type { Pin, Settings, StoredRegion, Visit } from './types';
+
+export type Tab = 'map' | 'ranking' | 'analysis' | 'settings';
+
+const DEFAULT_SETTINGS: Settings = {
+  ageFrom: 6,
+  ageTo: 8,
+  preset: 'standard',
+  weights: DEFAULT_WEIGHTS,
+  scope: 'region',
+  activeRegion: null,
+  showChoropleth: true,
+  autoRegion: true,
+  filter: DEFAULT_FILTER,
+  locationChoice: 'unasked',
+};
+
+interface Store {
+  settings: Settings;
+  updateSettings: (patch: Partial<Settings>) => void;
+  regions: StoredRegion[];
+  regionsLoaded: boolean;
+  reloadRegions: () => Promise<void>;
+  activeRegion: StoredRegion | null;
+  pins: Pin[];
+  visits: Visit[];
+  visitsByPin: Map<string, Visit[]>;
+  scoreByKey: Map<string, AreaScore>;
+  activeGroup: ScoreGroup | null;
+  avgLabel: string;
+  tab: Tab;
+  setTab: (t: Tab) => void;
+  focusArea: { key: string; ts: number } | null;
+  requestFocusArea: (key: string) => void;
+  toast: (msg: string) => void;
+  toastMsg: string | null;
+}
+
+const Ctx = createContext<Store | null>(null);
+
+export const useStore = () => {
+  const s = useContext(Ctx);
+  if (!s) throw new Error('StoreProvider がありません');
+  return s;
+};
+
+/** 「山形市」→「市」平均 のように、比較範囲の呼び方 */
+const unitOf = (name: string) => (/[市町村区]$/.test(name) ? name.slice(-1) : '地域');
+
+export function StoreProvider({ children }: { children: ReactNode }) {
+  const [settings, setSettings] = useState<Settings>(() => {
+    const saved = loadSettings();
+    return { ...DEFAULT_SETTINGS, ...saved, filter: { ...DEFAULT_FILTER, ...saved?.filter } };
+  });
+  const [regions, setRegions] = useState<StoredRegion[]>([]);
+  const [regionsLoaded, setRegionsLoaded] = useState(false);
+  const [pins, setPins] = useState<Pin[]>([]);
+  const [visits, setVisits] = useState<Visit[]>([]);
+  const [tab, setTab] = useState<Tab>('map');
+  const [focusArea, setFocusArea] = useState<{ key: string; ts: number } | null>(null);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const toastTimer = useRef<number>();
+
+  const toast = useCallback((msg: string) => {
+    setToastMsg(msg);
+    window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(() => setToastMsg(null), 2800);
+  }, []);
+
+  const updateSettings = useCallback((patch: Partial<Settings>) => {
+    setSettings((s) => {
+      const next = { ...s, ...patch };
+      storeSettings(next);
+      return next;
+    });
+  }, []);
+
+  const reloadRecords = useCallback(async () => {
+    const [p, v] = await Promise.all([listPins(), listVisits()]);
+    setPins(p);
+    setVisits(v);
+  }, []);
+
+  const reloadRegions = useCallback(async () => {
+    const r = await listRegions();
+    r.sort((a, b) => a.code.localeCompare(b.code));
+    setRegions(r);
+  }, []);
+
+  // 起動時: 記録と地域を読み込む。地域が1つもなければ山形市をダウンロード
+  useEffect(() => {
+    requestPersistentStorage();
+    reloadRecords();
+    const off = onRecordsChange(reloadRecords);
+    (async () => {
+      let r = await listRegions();
+      if (!r.length) {
+        try {
+          const index = await fetchRegionIndex();
+          const entry = index.regions.find((e) => e.code === DEFAULT_REGION) ?? index.regions[0];
+          if (entry) {
+            await downloadRegion(entry);
+            r = await listRegions();
+          }
+        } catch {
+          toast('地域データを取得できませんでした。電波の良い場所で設定→地域の追加から読み込んでください');
+        }
+      }
+      r.sort((a, b) => a.code.localeCompare(b.code));
+      setRegions(r);
+      setRegionsLoaded(true);
+    })();
+    return off;
+  }, [reloadRecords, toast]);
+
+  // 表示中の地域が未設定・削除済みなら先頭の地域にする
+  useEffect(() => {
+    if (!regionsLoaded) return;
+    if (regions.length && !regions.some((r) => r.code === settings.activeRegion)) {
+      updateSettings({ activeRegion: regions[0].code });
+    }
+  }, [regions, regionsLoaded, settings.activeRegion, updateSettings]);
+
+  const visitsByPin = useMemo(() => {
+    const m = new Map<string, Visit[]>();
+    for (const v of visits) {
+      const arr = m.get(v.pinId);
+      if (arr) arr.push(v);
+      else m.set(v.pinId, [v]);
+    }
+    for (const arr of m.values()) arr.sort((a, b) => a.visitedAt.localeCompare(b.visitedAt));
+    return m;
+  }, [visits]);
+
+  const activeRegion = regions.find((r) => r.code === settings.activeRegion) ?? null;
+
+  const { scoreByKey, groups } = useMemo(() => {
+    const s = { ageFrom: settings.ageFrom, ageTo: settings.ageTo, weights: settings.weights };
+    const groups = new Map<string, ScoreGroup>();
+    if (settings.scope === 'all') {
+      groups.set('all', scoreGroup(regions.map((r) => ({ regionCode: r.code, features: r.data.features })), s, '全地域'));
+    } else {
+      for (const r of regions) groups.set(r.code, scoreGroup([{ regionCode: r.code, features: r.data.features }], s, unitOf(r.name)));
+    }
+    const scoreByKey = new Map<string, AreaScore>();
+    for (const g of groups.values()) for (const a of [...g.ranked, ...g.insufficient]) scoreByKey.set(a.key, a);
+    return { scoreByKey, groups };
+  }, [regions, settings.ageFrom, settings.ageTo, settings.weights, settings.scope]);
+
+  const activeGroup = (settings.scope === 'all' ? groups.get('all') : groups.get(settings.activeRegion ?? '')) ?? null;
+  const avgLabel = settings.scope === 'all' ? '全地域' : activeRegion ? unitOf(activeRegion.name) : '市';
+
+  const requestFocusArea = useCallback((key: string) => {
+    setFocusArea({ key, ts: Date.now() });
+    setTab('map');
+  }, []);
+
+  const value: Store = {
+    settings, updateSettings, regions, regionsLoaded, reloadRegions, activeRegion,
+    pins, visits, visitsByPin, scoreByKey, activeGroup, avgLabel,
+    tab, setTab, focusArea, requestFocusArea, toast, toastMsg,
+  };
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+}

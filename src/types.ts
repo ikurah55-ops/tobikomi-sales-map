@@ -1,0 +1,127 @@
+import type { Feature, FeatureCollection, MultiPolygon, Polygon } from 'geojson';
+
+// ---------- 地域データ(前処理済みファイルの形) ----------
+
+/** 町丁目1件分の統計値。null は秘匿・該当なし・比較不可 */
+export interface AreaProps {
+  key: string; // KEY_CODE
+  name: string;
+  hh: number | null; // 世帯総数
+  pop: number | null; // 2020年 総人口
+  pop15: number | null; // 2015年 総人口(境界変更時は null)
+  age: (number | null)[]; // 5歳階級 18区分(0〜4歳 … 85歳以上)
+  gen: number | null; // 一般世帯数
+  cc: number | null; // 夫婦と子どもから成る世帯
+  fT: number | null; // 女性人口(労働力状態の母数)
+  fE: number | null; // 女性就業者
+  main: number | null; // 主世帯数
+  od: number | null; // 持ち家の一戸建て
+  ins?: boolean; // データ不足
+  insR?: string;
+}
+
+export type AreaFeature = Feature<Polygon | MultiPolygon, AreaProps>;
+
+export interface RegionMeta {
+  code: string; // 市区町村コード 5桁
+  name: string;
+  prefCode: string;
+  prefName: string;
+  dataYear: number;
+  size: number; // バイト
+  bbox: [number, number, number, number]; // [西, 南, 東, 北]
+  center: [number, number]; // [緯度, 経度]
+  isDummy?: boolean;
+  generatedAt?: string;
+}
+
+export interface RegionIndexEntry extends RegionMeta {
+  path: string;
+  areaCount: number;
+}
+
+export interface RegionFile extends FeatureCollection<Polygon | MultiPolygon, AreaProps> {
+  format: number;
+  code: string;
+  name: string;
+  prefCode: string;
+  prefName: string;
+  dataYear: number;
+  source: string;
+  isDummy?: boolean;
+  femaleAgeRange: string;
+  notes: string[];
+  generatedAt: string;
+  bbox: [number, number, number, number];
+  features: AreaFeature[];
+}
+
+/** IndexedDB に保存するダウンロード済み地域 */
+export interface StoredRegion extends RegionMeta {
+  downloadedAt: string;
+  data: RegionFile;
+}
+
+// ---------- 訪問ピンと記録 ----------
+
+export type HousingType = 'house' | 'apartment' | 'mansion' | 'other';
+export type Presence = 'home' | 'away' | 'noanswer';
+export type Reaction = 'listened' | 'material' | 'appointment' | 'contract' | 'rejected' | 'refusal';
+export type Competitor = 'yes' | 'no' | 'unknown';
+export type Weather = 'sunny' | 'cloudy' | 'rain' | 'snow';
+
+export interface Pin {
+  id: string;
+  lat: number;
+  lng: number;
+  regionCode: string | null;
+  areaKey: string | null;
+  areaName: string | null;
+  housingType: HousingType | null;
+  label: string;
+  noRevisit: boolean;
+  revisitDate: string | null; // YYYY-MM-DD
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Visit {
+  id: string;
+  pinId: string;
+  visitedAt: string; // ISO
+  presence: Presence;
+  reaction: Reaction | null;
+  competitor: Competitor | null;
+  weather: Weather | null;
+  memo: string;
+  createdAt: string;
+}
+
+// ---------- 設定 ----------
+
+export type IndicatorKey = 'family' | 'age' | 'femaleNonWork' | 'ownedDetached' | 'growth';
+export type Weights = Record<IndicatorKey, number>;
+export type CompareScope = 'region' | 'all';
+
+export type PinStatus = 'success' | 'talked' | 'notmet' | 'rejected' | 'blocked' | 'none';
+
+export interface PinFilter {
+  statuses: PinStatus[]; // 空 = すべて
+  presence: 'all' | 'home' | 'away';
+  competitor: 'all' | Competitor;
+  period: 'all' | 'today' | 'week' | 'month' | '3months';
+  revisitOnly: boolean;
+}
+
+export interface Settings {
+  ageFrom: number; // 5歳階級のインデックス(5 = 25〜29歳)
+  ageTo: number; // 12 = 60〜64歳
+  preset: string | null;
+  weights: Weights;
+  scope: CompareScope;
+  activeRegion: string | null;
+  showChoropleth: boolean;
+  autoRegion: boolean;
+  filter: PinFilter;
+  locationChoice: 'unasked' | 'allowed' | 'declined';
+}

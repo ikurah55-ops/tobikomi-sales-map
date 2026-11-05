@@ -95,6 +95,57 @@ export interface Visit {
   createdAt: string;
 }
 
+// ---------- 駐車場のある店(OpenStreetMap から scripts/facilities.mjs で作る) ----------
+
+export type FacilityCat = 'conv' | 'super' | 'books' | 'drug' | 'home' | 'mall';
+
+export interface Facility {
+  id: string; // OSM の id(n123 / w456)
+  n: string; // 店名
+  c: FacilityCat;
+  lat: number;
+  lng: number;
+  s: number; // 駐車場の推定台数
+}
+
+export interface FacilityFile {
+  format: number;
+  code: string;
+  name: string;
+  prefCode: string;
+  prefName: string;
+  generatedAt: string;
+  osmFetchedAt?: string;
+  facilities: Facility[];
+}
+
+export interface FacilityIndexEntry {
+  code: string;
+  name: string;
+  prefCode: string;
+  prefName: string;
+  path: string;
+  count: number;
+  size: number;
+  generatedAt: string;
+}
+
+/** IndexedDB に保存するダウンロード済みの店データ(市区町村ごと) */
+export interface StoredFacilities extends FacilityIndexEntry {
+  downloadedAt: string;
+  data: FacilityFile;
+}
+
+/** 端末ごとの店の扱い。ok = 使える駐車場として登録、hidden = 地図から消す */
+export interface FacilityMark {
+  id: string;
+  status: 'ok' | 'hidden';
+  name: string;
+  lat: number;
+  lng: number;
+  updatedAt: string;
+}
+
 // ---------- 設定 ----------
 
 export type IndicatorKey = 'family' | 'age' | 'kids' | 'ownedDetached' | 'growth';
@@ -122,4 +173,7 @@ export interface Settings {
   autoRegion: boolean;
   filter: PinFilter;
   locationChoice: 'unasked' | 'allowed' | 'declined';
+  showFacilities: boolean;
+  facilityMinSpaces: number; // この台数以上の駐車場がある店だけ出す(登録済みの店は常に出す)
+  facilityCats: FacilityCat[];
 }

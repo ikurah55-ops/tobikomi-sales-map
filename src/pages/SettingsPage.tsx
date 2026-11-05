@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { FacilitySettings } from '../components/FacilitySettings';
 import { Toggle } from '../components/ui';
 import { canShareFile, exportCsv, exportJson, importJson, lastBackupAt, shareJson } from '../data/backup';
 import { downloadRegion, fetchRegionIndex, formatSize, hasUpdate, type RegionIndex } from '../data/regions';
@@ -195,6 +196,8 @@ export function SettingsPage() {
         )}
       </section>
 
+      <FacilitySettings pref={pref} />
+
       <section className="panel">
         <h3>位置情報</h3>
         <Toggle
@@ -277,7 +280,7 @@ export function SettingsPage() {
         <ul>
           <li>訪問記録は端末内(IndexedDB)にだけ保存し、外部には送信しません。</li>
           <li>氏名・電話番号・健康状態など個人情報は記録しないでください。</li>
-          <li>地図: © OpenStreetMap contributors</li>
+          <li>地図・店と駐車場の情報: © OpenStreetMap contributors</li>
           <li>
             統計: {regions.some((r) => r.isDummy)
               ? '現在はダミーデータ(架空の数値)です。実データは政府統計の総合窓口(e-Stat)の国勢調査 小地域集計を加工して作成します。'

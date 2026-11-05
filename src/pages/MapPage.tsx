@@ -3,10 +3,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AttributionControl, MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
 import { AreaSheet } from '../components/AreaSheet';
 import { FilterSheet } from '../components/FilterSheet';
-import { AreaLayer, LocationLayer, PinLayer } from '../components/MapLayers';
+import { FacilitySheet } from '../components/FacilitySheet';
+import { AreaLayer, FacilityLayer, LocationLayer, PinLayer } from '../components/MapLayers';
 import { PinSheet } from '../components/PinSheet';
 import { VisitForm, type VisitFormTarget } from '../components/VisitForm';
-import { DEFAULT_CENTER, LOW_ACCURACY_M } from '../config';
+import { DEFAULT_CENTER, FACILITY_MIN_ZOOM, LOW_ACCURACY_M } from '../config';
 import { fetchRegionIndex } from '../data/regions';
 import { requestCompassPermission, useCompass, useGeolocation } from '../hooks/useGeolocation';
 import { bboxContains, distanceToBbox, featureBounds, locate } from '../lib/geo';
@@ -14,7 +15,7 @@ import { isFilterActive, pinMatchesFilter } from '../lib/records';
 import { CLASS_COLORS, CLASS_LABELS } from '../lib/score';
 import { useStore } from '../store';
 import { BackupReminder } from '../components/BackupReminder';
-import type { Pin, Visit } from '../types';
+import type { Facility, Pin, Visit } from '../types';
 
 function MapEvents({ onLongPress, onUserMove }: { onLongPress: (lat: number, lng: number) => void; onUserMove: () => void }) {
   useMapEvents({
@@ -27,11 +28,12 @@ function MapEvents({ onLongPress, onUserMove }: { onLongPress: (lat: number, lng
 
 export function MapPage() {
   const store = useStore();
-  const { settings, updateSettings, regions, activeRegion, pins, visitsByPin, scoreByKey, toast, tab, focusArea } = store;
+  const { settings, updateSettings, regions, activeRegion, pins, visitsByPin, scoreByKey, toast, tab, focusArea, facilitySets, facilityMarks } = store;
   const mapRef = useRef<L.Map | null>(null);
   const [follow, setFollow] = useState(false);
   const [selectedArea, setSelectedArea] = useState<string | null>(null);
   const [selectedPin, setSelectedPin] = useState<string | null>(null);
+  const [selectedFacility, setSelectedFacility] = useState<Facility | null>(null);
   const [form, setForm] = useState<VisitFormTarget | null>(null);
   const [showFilter, setShowFilter] = useState(false);
   const [showLegend, setShowLegend] = useState(false);
@@ -155,6 +157,25 @@ export function MapPage() {
     () => pins.filter((p) => pinMatchesFilter(p, visitsByPin.get(p.id) ?? [], settings.filter)),
     [pins, visitsByPin, settings.filter],
   );
+  // ---- 駐車場のある店 ----
+  // 消した店は出さない。「使える」に登録した店は台数・種類の条件に関係なく出す
+  const { shownFacilities, okFacilityIds } = useMemo(() => {
+    const ok = new Set<string>();
+    const shown: Facility[] = [];
+    if (settings.showFacilities) {
+      const cats = new Set(settings.facilityCats);
+      for (const set of facilitySets) {
+        for (const f of set.data.facilities) {
+          const m = facilityMarks.get(f.id)?.status;
+          if (m === 'hidden') continue;
+          if (m === 'ok') ok.add(f.id);
+          if (m === 'ok' || (cats.has(f.c) && f.s >= settings.facilityMinSpaces)) shown.push(f);
+        }
+      }
+    }
+    return { shownFacilities: shown, okFacilityIds: ok };
+  }, [facilitySets, facilityMarks, settings.showFacilities, settings.facilityCats, settings.facilityMinSpaces]);
+
   const pinNow = selectedPin ? pins.find((p) => p.id === selectedPin) ?? null : null;
 
   const openNewPin = (lat: number, lng: number, source: 'gps' | 'press') => {
@@ -271,6 +292,12 @@ export function MapPage() {
               setSelectedArea(k);
             }}
           />
+          <FacilityLayer
+            facilities={shownFacilities}
+            okIds={okFacilityIds}
+            minZoom={FACILITY_MIN_ZOOM}
+            onSelect={(f) => { setSelectedArea(null); setSelectedPin(null); setSelectedFacility(f); }}
+          />
           <PinLayer pins={visiblePins} visitsByPin={visitsByPin} onSelect={(p: Pin) => { setSelectedArea(null); setSelectedPin(p.id); }} />
           {pos && <LocationLayer pos={pos} heading={compass} />}
           <MapEvents onLongPress={(lat, lng) => openNewPin(lat, lng, 'press')} onUserMove={() => setFollow(false)} />
@@ -289,6 +316,15 @@ export function MapPage() {
           <button className={`fab${filterOn ? ' on' : ''}`} onClick={() => setShowFilter(true)} aria-label="ピンの絞り込み">
             <span>⚲</span><small>絞込</small>
           </button>
+          {facilitySets.length > 0 && (
+            <button
+              className={`fab${settings.showFacilities ? ' on' : ''}`}
+              onClick={() => updateSettings({ showFacilities: !settings.showFacilities })}
+              aria-label="駐車場のある店の表示切り替え"
+            >
+              <span>P</span><small>駐車場</small>
+            </button>
+          )}
           <button className={`fab${showLegend ? ' on' : ''}`} onClick={() => setShowLegend((s) => !s)} aria-label="凡例">
             <span>≡</span><small>凡例</small>
           </button>
@@ -309,6 +345,13 @@ export function MapPage() {
             <div className="legend-row"><i className="dot" style={{ background: '#eab308' }} /> 不在(未接触)</div>
             <div className="legend-row"><i className="dot" style={{ background: '#f97316' }} /> 断られた</div>
             <div className="legend-row"><i className="dot" style={{ background: '#8b8f97' }} /> 再訪禁止</div>
+            {facilitySets.length > 0 && (
+              <>
+                <div className="legend-title" style={{ marginTop: 6 }}>駐車場のある店</div>
+                <div className="legend-row"><i className="dot" style={{ background: '#1d4ed8', borderRadius: 3 }} /> {settings.facilityMinSpaces}台以上(寄せると表示)</div>
+                <div className="legend-row"><i className="dot" style={{ background: '#16a34a', borderRadius: 3 }} /> 使える駐車場</div>
+              </>
+            )}
           </div>
         )}
 
@@ -364,6 +407,9 @@ export function MapPage() {
           onAddVisit={() => setForm({ kind: 'add', pin: pinNow })}
           onEditVisit={(v: Visit) => setForm({ kind: 'edit', pin: pinNow, visit: v })}
         />
+      )}
+      {selectedFacility && !form && (
+        <FacilitySheet facility={selectedFacility} here={pos ? { lat: pos.lat, lng: pos.lng } : null} onClose={() => setSelectedFacility(null)} />
       )}
       {form && <VisitForm target={form} onClose={() => setForm(null)} />}
     </div>

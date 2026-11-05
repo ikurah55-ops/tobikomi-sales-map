@@ -1,6 +1,6 @@
-import type { Pin, Visit } from '../types';
+import type { FacilityMark, Pin, Visit } from '../types';
 import { COMPETITOR_LABEL, HOUSING_LABEL, PRESENCE_LABEL, REACTION_LABEL, WEATHER_LABEL } from '../lib/records';
-import { listPins, listVisits, upsertRecords } from './repository';
+import { listFacilityMarks, listPins, listVisits, upsertFacilityMarks, upsertRecords } from './repository';
 
 const APP_ID = 'tobikomi-sales-map';
 
@@ -23,8 +23,8 @@ const stamp = () => {
 };
 
 async function backupBody() {
-  const [pins, visits] = await Promise.all([listPins(), listVisits()]);
-  return { count: visits.length, json: JSON.stringify({ app: APP_ID, version: 1, exportedAt: new Date().toISOString(), pins, visits }, null, 1) };
+  const [pins, visits, facilityMarks] = await Promise.all([listPins(), listVisits(), listFacilityMarks()]);
+  return { count: visits.length, json: JSON.stringify({ app: APP_ID, version: 1, exportedAt: new Date().toISOString(), pins, visits, facilityMarks }, null, 1) };
 }
 
 export async function exportJson(): Promise<number> {
@@ -107,6 +107,10 @@ export async function importJson(file: File): Promise<{ pins: number; visits: nu
   const pins = (data.pins as Pin[]).filter((p) => p && typeof p.id === 'string' && typeof p.lat === 'number');
   const visits = (data.visits as Visit[]).filter((v) => v && typeof v.id === 'string' && typeof v.pinId === 'string');
   await upsertRecords(pins, visits);
+  // 店の登録(使える駐車場・消した店)は後から加えたので、古いバックアップにはない
+  if (Array.isArray(data.facilityMarks)) {
+    await upsertFacilityMarks((data.facilityMarks as FacilityMark[]).filter((m) => m && typeof m.id === 'string' && (m.status === 'ok' || m.status === 'hidden')));
+  }
   return { pins: pins.length, visits: visits.length };
 }
 

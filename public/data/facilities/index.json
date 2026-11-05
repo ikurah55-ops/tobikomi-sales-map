@@ -1,0 +1,275 @@
+{
+ "regions": [
+  {
+   "code": "06201",
+   "name": "山形市",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06201.json",
+   "count": 55,
+   "size": 5809,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06202",
+   "name": "米沢市",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06202.json",
+   "count": 16,
+   "size": 2031,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06203",
+   "name": "鶴岡市",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06203.json",
+   "count": 66,
+   "size": 7238,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06204",
+   "name": "酒田市",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06204.json",
+   "count": 59,
+   "size": 6347,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06205",
+   "name": "新庄市",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06205.json",
+   "count": 6,
+   "size": 816,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06206",
+   "name": "寒河江市",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06206.json",
+   "count": 2,
+   "size": 402,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06207",
+   "name": "上山市",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06207.json",
+   "count": 6,
+   "size": 811,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06208",
+   "name": "村山市",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06208.json",
+   "count": 3,
+   "size": 506,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06209",
+   "name": "長井市",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06209.json",
+   "count": 6,
+   "size": 812,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06210",
+   "name": "天童市",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06210.json",
+   "count": 21,
+   "size": 2456,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06211",
+   "name": "東根市",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06211.json",
+   "count": 9,
+   "size": 1141,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06212",
+   "name": "尾花沢市",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06212.json",
+   "count": 1,
+   "size": 295,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06213",
+   "name": "南陽市",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06213.json",
+   "count": 5,
+   "size": 715,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06301",
+   "name": "山辺町",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06301.json",
+   "count": 1,
+   "size": 271,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06302",
+   "name": "中山町",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06302.json",
+   "count": 2,
+   "size": 368,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06321",
+   "name": "河北町",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06321.json",
+   "count": 2,
+   "size": 401,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06322",
+   "name": "西川町",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06322.json",
+   "count": 1,
+   "size": 274,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06365",
+   "name": "大蔵村",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06365.json",
+   "count": 1,
+   "size": 288,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06367",
+   "name": "戸沢村",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06367.json",
+   "count": 1,
+   "size": 278,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06381",
+   "name": "高畠町",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06381.json",
+   "count": 1,
+   "size": 303,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06382",
+   "name": "川西町",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06382.json",
+   "count": 1,
+   "size": 286,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06401",
+   "name": "小国町",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06401.json",
+   "count": 5,
+   "size": 675,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06402",
+   "name": "白鷹町",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06402.json",
+   "count": 1,
+   "size": 301,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06403",
+   "name": "飯豊町",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06403.json",
+   "count": 1,
+   "size": 300,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06426",
+   "name": "三川町",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06426.json",
+   "count": 4,
+   "size": 589,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06428",
+   "name": "庄内町",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06428.json",
+   "count": 11,
+   "size": 1406,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  },
+  {
+   "code": "06461",
+   "name": "遊佐町",
+   "prefCode": "06",
+   "prefName": "山形県",
+   "path": "06/06461.json",
+   "count": 3,
+   "size": 487,
+   "generatedAt": "2026-11-05T11:53:39.044Z"
+  }
+ ],
+ "generatedAt": "2026-11-05T11:53:39.044Z"
+}

@@ -1,10 +1,11 @@
 import L from 'leaflet';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Circle, Marker, useMap } from 'react-leaflet';
 import type { GeoState } from '../hooks/useGeolocation';
 import { STATUS_COLOR, isRevisitDue, pinStatus } from '../lib/records';
 import { CLASS_COLORS, type AreaScore } from '../lib/score';
-import type { Pin, PinStatus, StoredRegion, Visit } from '../types';
+import { FACILITY_SHORT } from '../data/facilities';
+import type { Facility, FacilityCat, Pin, PinStatus, StoredRegion, Visit } from '../types';
 
 // ---------- 町丁目の色分け ----------
 
@@ -93,6 +94,51 @@ export function PinLayer({
           position={[p.lat, p.lng]}
           icon={pinIcon(pinStatus(p, visitsByPin.get(p.id) ?? []), isRevisitDue(p))}
           eventHandlers={{ click: () => onSelect(p) }}
+        />
+      ))}
+    </>
+  );
+}
+
+// ---------- 駐車場のある店 ----------
+
+const facilityIconCache = new Map<string, L.DivIcon>();
+function facilityIcon(cat: FacilityCat, ok: boolean): L.DivIcon {
+  const k = `${cat}-${ok}`;
+  let icon = facilityIconCache.get(k);
+  if (!icon) {
+    icon = L.divIcon({
+      className: 'fac-icon',
+      html: `<div class="fac${ok ? ' fac-ok' : ''}"><b>P</b><small>${ok ? '✓' : FACILITY_SHORT[cat]}</small></div>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+    });
+    facilityIconCache.set(k, icon);
+  }
+  return icon;
+}
+
+/** 引いた地図では「使える」に登録した店だけ出す(数百件を一度に描かないため) */
+export function FacilityLayer({
+  facilities, okIds, minZoom, onSelect,
+}: { facilities: Facility[]; okIds: Set<string>; minZoom: number; onSelect: (f: Facility) => void }) {
+  const map = useMap();
+  const [zoom, setZoom] = useState(map.getZoom());
+  useEffect(() => {
+    const on = () => setZoom(map.getZoom());
+    map.on('zoomend', on);
+    return () => void map.off('zoomend', on);
+  }, [map]);
+  const shown = zoom >= minZoom ? facilities : facilities.filter((f) => okIds.has(f.id));
+  return (
+    <>
+      {shown.map((f) => (
+        <Marker
+          key={f.id}
+          position={[f.lat, f.lng]}
+          icon={facilityIcon(f.c, okIds.has(f.id))}
+          zIndexOffset={-500}
+          eventHandlers={{ click: () => onSelect(f) }}
         />
       ))}
     </>

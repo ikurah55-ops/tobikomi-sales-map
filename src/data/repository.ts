@@ -1,11 +1,13 @@
 // データの読み書きはすべてここを通す(将来 Supabase に移すときはこのファイルだけ差し替える)
 import Dexie, { type Table } from 'dexie';
-import type { Pin, Settings, StoredRegion, Visit } from '../types';
+import type { FacilityMark, Pin, Settings, StoredFacilities, StoredRegion, Visit } from '../types';
 
 class SalesDB extends Dexie {
   pins!: Table<Pin, string>;
   visits!: Table<Visit, string>;
   regions!: Table<StoredRegion, string>;
+  facilities!: Table<StoredFacilities, string>;
+  facilityMarks!: Table<FacilityMark, string>;
 
   constructor() {
     super('tobikomi-sales-map');
@@ -13,6 +15,10 @@ class SalesDB extends Dexie {
       pins: 'id, regionCode, areaKey, updatedAt',
       visits: 'id, pinId, visitedAt',
       regions: 'code',
+    });
+    this.version(2).stores({
+      facilities: 'code',
+      facilityMarks: 'id',
     });
   }
 }
@@ -107,6 +113,41 @@ export async function saveRegion(region: StoredRegion): Promise<void> {
 
 export async function deleteRegion(code: string): Promise<void> {
   await db.regions.delete(code);
+}
+
+// ---------- 駐車場のある店 ----------
+export async function listFacilitySets(): Promise<StoredFacilities[]> {
+  return db.facilities.toArray();
+}
+
+export async function saveFacilitySet(set: StoredFacilities): Promise<void> {
+  await db.facilities.put(set);
+}
+
+export async function deleteFacilitySet(code: string): Promise<void> {
+  await db.facilities.delete(code);
+}
+
+export async function listFacilityMarks(): Promise<FacilityMark[]> {
+  return db.facilityMarks.toArray();
+}
+
+/** status が null なら登録を外す(元の表示に戻す) */
+export async function setFacilityMark(mark: Omit<FacilityMark, 'status' | 'updatedAt'>, status: FacilityMark['status'] | null): Promise<void> {
+  if (status) await db.facilityMarks.put({ ...mark, status, updatedAt: new Date().toISOString() });
+  else await db.facilityMarks.delete(mark.id);
+  notify();
+}
+
+export async function clearHiddenFacilities(): Promise<number> {
+  const n = await db.facilityMarks.filter((m) => m.status === 'hidden').delete();
+  notify();
+  return n;
+}
+
+export async function upsertFacilityMarks(marks: FacilityMark[]): Promise<void> {
+  await db.facilityMarks.bulkPut(marks);
+  notify();
 }
 
 // ---------- 設定(端末に保存) ----------

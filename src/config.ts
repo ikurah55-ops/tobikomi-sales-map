@@ -4,6 +4,13 @@
 export const DATA_BASE_URL: string =
   import.meta.env.VITE_DATA_BASE_URL || `${import.meta.env.BASE_URL}data/regions/`;
 
+/** 駐車場のある店のデータの置き場所(地域データと同じ考え方) */
+export const FACILITY_BASE_URL: string =
+  import.meta.env.VITE_FACILITY_BASE_URL || `${import.meta.env.BASE_URL}data/facilities/`;
+
+/** 店のアイコンを出す最小ズーム(これより引くと「使える」に登録した店だけ出す) */
+export const FACILITY_MIN_ZOOM = 13;
+
 /** 初回起動時に自動で読み込む地域(山形市) */
 export const DEFAULT_REGION = '06201';
 

@@ -239,6 +239,16 @@ textarea.input { resize: vertical; }
 .backup-reminder b { color: #92400e; }
 .backup-reminder-actions { display: flex; gap: 8px; }
 
+/* 駐車場のある店 */
+.fac-icon { background: none; border: 0; }
+.fac { width: 30px; height: 30px; border-radius: 7px; background: #1d4ed8; border: 2px solid #fff; color: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); display: flex; align-items: center; justify-content: center; gap: 1px; line-height: 1; }
+.fac b { font-size: 14px; }
+.fac small { font-size: 9px; font-weight: 700; }
+.fac-ok { background: #16a34a; }
+.fac-meta { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0 0 12px; font-size: 14px; }
+.fac-meta dt { color: var(--muted); }
+.fac-meta dd { margin: 0; }
+
 /* ピン */
 .pin-icon { background: none; border: 0; }
 .pin {

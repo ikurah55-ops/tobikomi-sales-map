@@ -1,10 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { DEFAULT_REGION } from './config';
 import { downloadRegion, fetchRegionIndex } from './data/regions';
-import { listPins, listRegions, listVisits, loadSettings, onRecordsChange, requestPersistentStorage, storeSettings } from './data/repository';
+import { listFacilityMarks, listFacilitySets, listPins, listRegions, listVisits, loadSettings, onRecordsChange, requestPersistentStorage, storeSettings } from './data/repository';
 import { DEFAULT_FILTER } from './lib/records';
 import { DEFAULT_WEIGHTS, scoreGroup, type AreaScore, type ScoreGroup } from './lib/score';
-import type { Pin, Settings, StoredRegion, Visit, Weights } from './types';
+import { FACILITY_CATS } from './data/facilities';
+import type { FacilityMark, Pin, Settings, StoredFacilities, StoredRegion, Visit, Weights } from './types';
 
 /** 前処理(scripts/preprocess.mjs)が出力する地域データの形式番号。これより古い保存データは自動で取り直す */
 const REGION_FORMAT = 2;
@@ -22,6 +23,9 @@ const DEFAULT_SETTINGS: Settings = {
   autoRegion: true,
   filter: DEFAULT_FILTER,
   locationChoice: 'unasked',
+  showFacilities: true,
+  facilityMinSpaces: 30,
+  facilityCats: FACILITY_CATS,
 };
 
 interface Store {
@@ -34,6 +38,9 @@ interface Store {
   pins: Pin[];
   visits: Visit[];
   visitsByPin: Map<string, Visit[]>;
+  facilitySets: StoredFacilities[];
+  reloadFacilities: () => Promise<void>;
+  facilityMarks: Map<string, FacilityMark>;
   scoreByKey: Map<string, AreaScore>;
   activeGroup: ScoreGroup | null;
   avgLabel: string;
@@ -69,6 +76,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [regionsLoaded, setRegionsLoaded] = useState(false);
   const [pins, setPins] = useState<Pin[]>([]);
   const [visits, setVisits] = useState<Visit[]>([]);
+  const [facilitySets, setFacilitySets] = useState<StoredFacilities[]>([]);
+  const [facilityMarks, setFacilityMarks] = useState<Map<string, FacilityMark>>(new Map());
   const [tab, setTab] = useState<Tab>('map');
   const [focusArea, setFocusArea] = useState<{ key: string; ts: number } | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -89,9 +98,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const reloadRecords = useCallback(async () => {
-    const [p, v] = await Promise.all([listPins(), listVisits()]);
+    const [p, v, m] = await Promise.all([listPins(), listVisits(), listFacilityMarks()]);
     setPins(p);
     setVisits(v);
+    setFacilityMarks(new Map(m.map((x) => [x.id, x])));
+  }, []);
+
+  const reloadFacilities = useCallback(async () => {
+    const f = await listFacilitySets();
+    f.sort((a, b) => a.code.localeCompare(b.code));
+    setFacilitySets(f);
   }, []);
 
   const reloadRegions = useCallback(async () => {
@@ -104,6 +120,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     requestPersistentStorage();
     reloadRecords();
+    reloadFacilities();
     const off = onRecordsChange(reloadRecords);
     (async () => {
       let r = await listRegions();
@@ -147,7 +164,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     })();
     return off;
-  }, [reloadRecords, toast]);
+  }, [reloadRecords, reloadFacilities, toast]);
 
   // 表示中の地域が未設定・削除済みなら先頭の地域にする
   useEffect(() => {
@@ -193,7 +210,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const value: Store = {
     settings, updateSettings, regions, regionsLoaded, reloadRegions, activeRegion,
-    pins, visits, visitsByPin, scoreByKey, activeGroup, avgLabel,
+    pins, visits, visitsByPin, facilitySets, reloadFacilities, facilityMarks, scoreByKey, activeGroup, avgLabel,
     tab, setTab, focusArea, requestFocusArea, toast, toastMsg,
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

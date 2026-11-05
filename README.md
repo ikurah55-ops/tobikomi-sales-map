@@ -226,3 +226,20 @@ npm run data:dummy
 | `src/pages/` | 地図 / ランキング / 分析 / 設定 |
 | `scripts/preprocess.mjs` | 統計CSV+境界 → 地域データ |
 | `scripts/make-dummy-raw.mjs` | ダミーの生データ作成 |
+
+## 駐車場のある店のデータ
+
+コンビニ・スーパー・本屋・ホームセンター・ドラッグストア・モールのうち、駐車場の大きい店を OpenStreetMap から抜き出して市区町村ごとの JSON にします(地域データと同じく、アプリの設定画面から市区町村ごとにダウンロード)。
+
+```powershell
+npm run data:facilities -- --pref 06            # 山形県(data/raw/osm-06.json があれば再利用)
+npm run data:facilities -- --pref 06 --refresh  # Overpass API から取り直す
+```
+
+- 先に `npm run data:build -- --pref 06` で地域データを作っておく(店の市区町村の判定に使う)
+- 出力: `public/data/facilities/06/06201.json` と `public/data/facilities/index.json`
+- 台数は駐車場の面積 ÷ 25㎡ の推定値。店から一定距離(コンビニ40m〜モール180m)にある駐車場を、いちばん近い店1つに割り当てる
+- 有料駐車場・関係者以外不可の駐車場、駅の売店は除く。コンビニは80台を超える駐車場を数えない(駅・病院などの駐車場が隣にあることが多いため)
+- 10台未満の店はデータに入れない。アプリでは初期値「30台以上」で、設定で10〜100台に変えられる
+- 地図データに駐車場が描かれていない店は出ない(山形県では店1,058件のうち290件)
+- 「使える駐車場」の登録と「地図から消した店」は端末内(IndexedDB)に保存し、JSONバックアップにも含める

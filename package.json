@@ -9,6 +9,7 @@
     "preview": "vite preview --host",
     "data:dummy": "node scripts/make-dummy-raw.mjs && node scripts/preprocess.mjs --raw data/raw-dummy --pref 06 --dummy",
     "data:build": "node scripts/preprocess.mjs",
+    "data:facilities": "node scripts/facilities.mjs",
     "data:inspect": "node scripts/preprocess.mjs --inspect",
     "icons": "node scripts/make-icons.mjs"
   },

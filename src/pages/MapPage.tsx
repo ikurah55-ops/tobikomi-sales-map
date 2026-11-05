@@ -5,6 +5,7 @@ import { AreaSheet } from '../components/AreaSheet';
 import { FilterSheet } from '../components/FilterSheet';
 import { FacilitySheet } from '../components/FacilitySheet';
 import { AreaLayer, FacilityLayer, LocationLayer, PinLayer } from '../components/MapLayers';
+import { ParkingForm } from '../components/ParkingForm';
 import { PinSheet } from '../components/PinSheet';
 import { VisitForm, type VisitFormTarget } from '../components/VisitForm';
 import { DEFAULT_CENTER, FACILITY_MIN_ZOOM, LOW_ACCURACY_M } from '../config';
@@ -172,9 +173,17 @@ export function MapPage() {
           if (m === 'ok' || (cats.has(f.c) && f.s >= settings.facilityMinSpaces)) shown.push(f);
         }
       }
+      // 自分で追加した駐車場は店データがなくても出す
+      for (const m of facilityMarks.values()) {
+        if (!m.custom) continue;
+        ok.add(m.id);
+        shown.push({ id: m.id, n: m.name, c: 'own', lat: m.lat, lng: m.lng, s: 0 });
+      }
     }
     return { shownFacilities: shown, okFacilityIds: ok };
   }, [facilitySets, facilityMarks, settings.showFacilities, settings.facilityCats, settings.facilityMinSpaces]);
+  const hasCustomParking = useMemo(() => [...facilityMarks.values()].some((m) => m.custom), [facilityMarks]);
+  const [parkingAt, setParkingAt] = useState<{ lat: number; lng: number } | null>(null);
 
   const pinNow = selectedPin ? pins.find((p) => p.id === selectedPin) ?? null : null;
 
@@ -316,7 +325,7 @@ export function MapPage() {
           <button className={`fab${filterOn ? ' on' : ''}`} onClick={() => setShowFilter(true)} aria-label="ピンの絞り込み">
             <span>⚲</span><small>絞込</small>
           </button>
-          {facilitySets.length > 0 && (
+          {(facilitySets.length > 0 || hasCustomParking) && (
             <button
               className={`fab${settings.showFacilities ? ' on' : ''}`}
               onClick={() => updateSettings({ showFacilities: !settings.showFacilities })}
@@ -345,11 +354,11 @@ export function MapPage() {
             <div className="legend-row"><i className="dot" style={{ background: '#eab308' }} /> 不在(未接触)</div>
             <div className="legend-row"><i className="dot" style={{ background: '#f97316' }} /> 断られた</div>
             <div className="legend-row"><i className="dot" style={{ background: '#8b8f97' }} /> 再訪禁止</div>
-            {facilitySets.length > 0 && (
+            {(facilitySets.length > 0 || hasCustomParking) && (
               <>
                 <div className="legend-title" style={{ marginTop: 6 }}>駐車場のある店</div>
                 <div className="legend-row"><i className="dot" style={{ background: '#1d4ed8', borderRadius: 3 }} /> {settings.facilityMinSpaces}台以上(寄せると表示)</div>
-                <div className="legend-row"><i className="dot" style={{ background: '#16a34a', borderRadius: 3 }} /> 使える駐車場</div>
+                <div className="legend-row"><i className="dot" style={{ background: '#16a34a', borderRadius: 3 }} /> 使える駐車場(★は自分で追加)</div>
               </>
             )}
           </div>
@@ -411,7 +420,14 @@ export function MapPage() {
       {selectedFacility && !form && (
         <FacilitySheet facility={selectedFacility} here={pos ? { lat: pos.lat, lng: pos.lng } : null} onClose={() => setSelectedFacility(null)} />
       )}
-      {form && <VisitForm target={form} onClose={() => setForm(null)} />}
+      {form && (
+        <VisitForm
+          target={form}
+          onClose={() => setForm(null)}
+          onRegisterParking={form.kind === 'new' ? () => { setParkingAt({ lat: form.lat, lng: form.lng }); setForm(null); } : undefined}
+        />
+      )}
+      {parkingAt && <ParkingForm lat={parkingAt.lat} lng={parkingAt.lng} onClose={() => setParkingAt(null)} />}
     </div>
   );
 }

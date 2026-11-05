@@ -97,7 +97,8 @@ export interface Visit {
 
 // ---------- 駐車場のある店(OpenStreetMap から scripts/facilities.mjs で作る) ----------
 
-export type FacilityCat = 'conv' | 'super' | 'books' | 'drug' | 'home' | 'mall';
+// own = 自分で地図に追加した駐車場(配信データにはない)
+export type FacilityCat = 'conv' | 'super' | 'books' | 'drug' | 'home' | 'mall' | 'own';
 
 export interface Facility {
   id: string; // OSM の id(n123 / w456)
@@ -141,6 +142,8 @@ export interface FacilityMark {
   id: string;
   status: 'ok' | 'hidden';
   name: string;
+  custom?: boolean; // 配信データにない、自分で追加した駐車場
+  memo?: string;
   lat: number;
   lng: number;
   updatedAt: string;

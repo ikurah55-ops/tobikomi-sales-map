@@ -44,6 +44,7 @@ export function FacilitySettings({ pref }: { pref: string }) {
     all.filter((f) => settings.facilityCats.includes(f.c) && f.s >= min && facilityMarks.get(f.id)?.status !== 'hidden').length;
   const marks = [...facilityMarks.values()];
   const okCount = marks.filter((m) => m.status === 'ok').length;
+  const customCount = marks.filter((m) => m.custom).length;
   const hiddenCount = marks.length - okCount;
   // 地域データを持っているのに店データがない市区町村(まとめて取得する)
   const missing = index?.regions.filter((e) => regions.some((r) => r.code === e.code) && !facilitySets.some((f) => f.code === e.code)) ?? [];
@@ -54,7 +55,7 @@ export function FacilitySettings({ pref }: { pref: string }) {
       <h3>駐車場のある店</h3>
       <p className="muted small">
         コンビニ・スーパー・本屋・ホームセンター・ドラッグストア・モールのうち、駐車場が大きい店を地図に出します。台数は OpenStreetMap の地図データの駐車場の面積から推定しています(地図データに駐車場がない店は出ません)。
-        店のアイコンは地図を町丁目の名前が読めるくらいまで寄せると出ます。「使える駐車場」に登録した店はいつでも出ます。
+        店のアイコンは地図を町丁目の名前が読めるくらいまで寄せると出ます。「使える駐車場」に登録した店はいつでも出ます。店のデータにない駐車場は、地図を長押し →「ここを使える駐車場として登録」で追加できます。
       </p>
       <Toggle checked={settings.showFacilities} onChange={(v) => updateSettings({ showFacilities: v })} label="地図に表示する" />
 
@@ -77,7 +78,7 @@ export function FacilitySettings({ pref }: { pref: string }) {
       </div>
 
       <p className="small" style={{ marginTop: 12 }}>
-        使える駐車場に登録: {okCount}件 ・ 地図から消した店: {hiddenCount}件
+        使える駐車場に登録: {okCount}件{customCount > 0 && `(うち自分で追加 ${customCount}件)`} ・ 地図から消した店: {hiddenCount}件
         {hiddenCount > 0 && (
           <button
             className="link-btn"

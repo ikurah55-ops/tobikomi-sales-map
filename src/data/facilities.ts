@@ -11,6 +11,7 @@ export const FACILITY_LABEL: Record<FacilityCat, string> = {
   drug: 'ドラッグストア',
   home: 'ホームセンター',
   mall: 'モール・大型店',
+  own: '自分で登録した駐車場',
 };
 
 /** 地図アイコンの1文字 */
@@ -21,6 +22,7 @@ export const FACILITY_SHORT: Record<FacilityCat, string> = {
   drug: '薬',
   home: 'ホ',
   mall: 'モ',
+  own: '★',
 };
 
 /** 「○台以上」の選択肢 */

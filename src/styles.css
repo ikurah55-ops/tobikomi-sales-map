@@ -245,6 +245,7 @@ textarea.input { resize: vertical; }
 .fac b { font-size: 14px; }
 .fac small { font-size: 9px; font-weight: 700; }
 .fac-ok { background: #16a34a; }
+.parking-link { display: block; margin: -4px 0 8px; font-size: 13.5px; }
 .fac-meta { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0 0 12px; font-size: 14px; }
 .fac-meta dt { color: var(--muted); }
 .fac-meta dd { margin: 0; }

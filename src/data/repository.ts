@@ -139,6 +139,11 @@ export async function setFacilityMark(mark: Omit<FacilityMark, 'status' | 'updat
   notify();
 }
 
+/** 店のデータにない場所を「使える駐車場」として追加する */
+export async function addCustomParking(p: { name: string; memo: string; lat: number; lng: number }): Promise<void> {
+  await setFacilityMark({ id: `u-${newId()}`, name: p.name, memo: p.memo || undefined, lat: p.lat, lng: p.lng, custom: true }, 'ok');
+}
+
 export async function clearHiddenFacilities(): Promise<number> {
   const n = await db.facilityMarks.filter((m) => m.status === 'hidden').delete();
   notify();

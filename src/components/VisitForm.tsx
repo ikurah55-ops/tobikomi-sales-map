@@ -46,7 +46,9 @@ const addDays = (n: number) => {
   return todayStr(d);
 };
 
-export function VisitForm({ target, onClose }: { target: VisitFormTarget; onClose: () => void }) {
+export function VisitForm({
+  target, onClose, onRegisterParking,
+}: { target: VisitFormTarget; onClose: () => void; onRegisterParking?: () => void }) {
   const { visits, toast } = useStore();
   const editing = target.kind === 'edit' ? target.visit : null;
   const pin = target.kind === 'new' ? null : target.pin;
@@ -146,6 +148,11 @@ export function VisitForm({ target, onClose }: { target: VisitFormTarget; onClos
         </button>
       }
     >
+      {target.kind === 'new' && onRegisterParking && (
+        <button className="link-btn parking-link" onClick={onRegisterParking}>
+          🅿 訪問ではなく、ここを「使える駐車場」として登録
+        </button>
+      )}
       <div className="when-row">
         {editTime ? (
           <input type="datetime-local" className="input" value={visitedAt} onChange={(e) => setVisitedAt(e.target.value)} />

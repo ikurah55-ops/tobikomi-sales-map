@@ -109,7 +109,7 @@ function facilityIcon(cat: FacilityCat, ok: boolean): L.DivIcon {
   if (!icon) {
     icon = L.divIcon({
       className: 'fac-icon',
-      html: `<div class="fac${ok ? ' fac-ok' : ''}"><b>P</b><small>${ok ? '✓' : FACILITY_SHORT[cat]}</small></div>`,
+      html: `<div class="fac${ok ? ' fac-ok' : ''}"><b>P</b><small>${ok && cat !== 'own' ? '✓' : FACILITY_SHORT[cat]}</small></div>`,
       iconSize: [30, 30],
       iconAnchor: [15, 15],
     });

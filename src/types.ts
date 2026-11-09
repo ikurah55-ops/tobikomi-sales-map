@@ -167,7 +167,7 @@ export interface PinFilter {
 
 export interface Settings {
   ageFrom: number; // 5歳階級のインデックス(5 = 25〜29歳)
-  ageTo: number; // 12 = 60〜64歳
+  ageTo: number; // 12 = 60〜64歳、15 = 75歳以上(最後の階級)
   preset: string | null;
   weights: Weights;
   scope: CompareScope;

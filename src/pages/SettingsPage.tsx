@@ -5,13 +5,13 @@ import { canShareFile, exportCsv, exportJson, importJson, lastBackupAt, shareJso
 import { downloadRegion, fetchRegionIndex, formatSize, hasUpdate, type RegionIndex } from '../data/regions';
 import { deleteRegion } from '../data/repository';
 import { PREFECTURES } from '../lib/prefectures';
-import { INDICATOR_KEYS, INDICATOR_LABEL, PRESETS, adjustWeights, ageRangeLabel } from '../lib/score';
+import { AGE_TOP, INDICATOR_KEYS, INDICATOR_LABEL, PRESETS, adjustWeights, ageRangeLabel } from '../lib/score';
 import { isStandalone, useInstallPrompt } from '../hooks/useInstallPrompt';
 import { useStore } from '../store';
 import type { IndicatorKey, RegionIndexEntry } from '../types';
 
 const AGE_MIN = 5; // 25〜29歳
-const AGE_MAX = 12; // 60〜64歳
+const AGE_MAX = AGE_TOP; // 75歳以上
 
 export function SettingsPage() {
   const { settings, updateSettings, regions, reloadRegions, toast, activeRegion, setTab } = useStore();
@@ -93,7 +93,7 @@ export function SettingsPage() {
             onChange={(e) => setAge(settings.ageFrom, Math.max(+e.target.value, settings.ageFrom))} aria-label="上限" />
         </div>
         <div className="range-ticks">
-          {Array.from({ length: AGE_MAX - AGE_MIN + 1 }, (_, i) => <span key={i}>{(AGE_MIN + i) * 5}</span>)}
+          {Array.from({ length: AGE_MAX - AGE_MIN + 1 }, (_, i) => <span key={i}>{(AGE_MIN + i) * 5}{AGE_MIN + i === AGE_MAX ? '+' : ''}</span>)}
         </div>
         <p className="muted small">
           年齢の設定は「狙う年齢層の人口割合」の指標にだけ反映します。ほかの指標(家族類型・子どもがいる世帯・持ち家・人口増加率)は統計の都合で年齢と連動できないため固定で計算しています

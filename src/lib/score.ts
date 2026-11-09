@@ -38,7 +38,9 @@ export const PRESETS: Preset[] = [
 
 /** 5歳階級のインデックス → 「30〜34歳」 */
 export const bandLabel = (i: number) => (i >= 17 ? '85歳以上' : `${i * 5}〜${i * 5 + 4}歳`);
-export const ageRangeLabel = (from: number, to: number) => `${from * 5}〜${to * 5 + 4}歳`;
+/** 国勢調査の小地域集計は 75歳以上 が最後の階級。上限をここにすると「○歳以上」になる */
+export const AGE_TOP = 15;
+export const ageRangeLabel = (from: number, to: number) => (to >= AGE_TOP ? `${from * 5}歳以上` : `${from * 5}〜${to * 5 + 4}歳`);
 
 /** 1つの重みを変えたら、残りを元の比率のまま合計100になるよう調整する */
 export function adjustWeights(w: Weights, key: IndicatorKey, value: number): Weights {
@@ -67,9 +69,15 @@ type Fraction = { num: number; den: number } | null;
 function fractions(p: AreaFeature['properties'], ageFrom: number, ageTo: number): Record<IndicatorKey, Fraction> {
   const frac = (n: number | null, d: number | null): Fraction => (n != null && d != null && d > 0 ? { num: n, den: d } : null);
   let ageSum: number | null = 0;
-  for (let b = ageFrom; b <= ageTo; b++) {
+  // 上限が最後の階級なら、それより上の階級(データにあれば)もまとめて数える
+  const last = ageTo >= AGE_TOP ? p.age.length - 1 : ageTo;
+  for (let b = ageFrom; b <= last; b++) {
     const v = p.age[b];
-    if (v == null) { ageSum = null; break; }
+    if (v == null) {
+      if (b > AGE_TOP) continue;
+      ageSum = null;
+      break;
+    }
     ageSum += v;
   }
   return {

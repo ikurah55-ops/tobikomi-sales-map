@@ -3,6 +3,7 @@ import { MapPage } from './pages/MapPage';
 import { RankingPage } from './pages/RankingPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { useStore, type Tab } from './store';
+import { DesktopModeHint } from './components/DesktopModeHint';
 
 // グラフ(Recharts)は分析画面を開いたときだけ読み込む
 const AnalysisPage = lazy(() => import('./pages/AnalysisPage').then((m) => ({ default: m.AnalysisPage })));
@@ -34,6 +35,7 @@ export default function App() {
         ))}
       </nav>
       {toastMsg && <div className="toast" role="status">{toastMsg}</div>}
+      <DesktopModeHint />
     </div>
   );
 }

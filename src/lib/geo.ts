@@ -2,7 +2,7 @@ import type { AreaFeature, RegionFile } from '../types';
 
 type Ring = number[][];
 
-function inRing(x: number, y: number, ring: Ring): boolean {
+export function inRing(x: number, y: number, ring: Ring): boolean {
   let inside = false;
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
     const [xi, yi] = ring[i];

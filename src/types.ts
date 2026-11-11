@@ -199,3 +199,19 @@ export interface Track {
   memo: string;
   updatedAt: string;
 }
+
+// ---------- 範囲の営業記録(地図を指で囲って件数をまとめて記録) ----------
+
+export interface AreaRecord {
+  id: string;
+  /** 囲んだ範囲 [緯度, 経度] の並び */
+  polygon: [number, number][];
+  recordedAt: string; // ISO(営業した日時)
+  visited: number; // 訪問した件数
+  talked: number; // 話ができた件数
+  revisit: number; // 再訪の予約ができた件数
+  contract: number; // 成約した件数
+  memo: string;
+  createdAt: string;
+  updatedAt: string;
+}

@@ -398,3 +398,16 @@ textarea.input { resize: vertical; }
 .desktop-hint { position: fixed; left: 2%; right: 2%; top: 30%; z-index: 4000; background: #fff; border: 3px solid var(--navy); border-radius: 1em; padding: 1em 1.2em; line-height: 1.5; box-shadow: 0 1em 3em rgba(0,0,0,.35); color: var(--text); }
 .desktop-hint p { margin: .6em 0 1em; }
 .desktop-hint button { font-size: 1em; border: 0; background: var(--navy); color: #fff; border-radius: .6em; padding: .5em 1.4em; font-weight: 700; }
+
+/* ---------- 範囲の営業記録 ---------- */
+.draw-overlay { position: absolute; inset: 0; z-index: 900; touch-action: none; cursor: crosshair; background: rgba(234,88,12,.04); }
+.draw-overlay svg { display: block; pointer-events: none; }
+.draw-hint {
+  pointer-events: auto; display: inline-flex; align-items: center; gap: 8px; background: #fff7ed; border: 2px solid #ea580c; color: #9a3412;
+  border-radius: 18px; padding: 4px 4px 4px 12px; font-size: 13px; font-weight: 700; box-shadow: 0 2px 10px rgba(234,88,12,.25);
+}
+.draw-hint button { border: 0; background: #ea580c; color: #fff; border-radius: 14px; padding: 5px 12px; font-weight: 800; }
+.counter { display: grid; grid-template-columns: 52px 1fr 52px; gap: 8px; }
+.counter button { border: 1px solid var(--line); background: #fff; border-radius: 10px; font-size: 22px; font-weight: 700; color: var(--navy); min-height: 46px; }
+.counter button:active { background: var(--navy-light); }
+.counter .input { text-align: center; font-size: 20px; font-weight: 700; }

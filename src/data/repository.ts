@@ -1,6 +1,6 @@
 // データの読み書きはすべてここを通す(将来 Supabase に移すときはこのファイルだけ差し替える)
 import Dexie, { type Table } from 'dexie';
-import type { FacilityMark, Pin, Settings, StoredFacilities, StoredRegion, Track, Visit } from '../types';
+import type { AreaRecord, FacilityMark, Pin, Settings, StoredFacilities, StoredRegion, Track, Visit } from '../types';
 
 class SalesDB extends Dexie {
   pins!: Table<Pin, string>;
@@ -9,6 +9,7 @@ class SalesDB extends Dexie {
   facilities!: Table<StoredFacilities, string>;
   facilityMarks!: Table<FacilityMark, string>;
   tracks!: Table<Track, string>;
+  areaRecords!: Table<AreaRecord, string>;
 
   constructor() {
     super('tobikomi-sales-map');
@@ -23,6 +24,9 @@ class SalesDB extends Dexie {
     });
     this.version(3).stores({
       tracks: 'id, startedAt',
+    });
+    this.version(4).stores({
+      areaRecords: 'id, recordedAt',
     });
   }
 }
@@ -187,6 +191,26 @@ export async function deleteTrack(id: string): Promise<void> {
 
 export async function upsertTracks(tracks: Track[]): Promise<void> {
   await db.tracks.bulkPut(tracks);
+  notify();
+}
+
+// ---------- 範囲の営業記録 ----------
+export async function listAreaRecords(): Promise<AreaRecord[]> {
+  return db.areaRecords.orderBy('recordedAt').reverse().toArray();
+}
+
+export async function saveAreaRecord(r: AreaRecord): Promise<void> {
+  await db.areaRecords.put({ ...r, updatedAt: new Date().toISOString() });
+  notify();
+}
+
+export async function deleteAreaRecord(id: string): Promise<void> {
+  await db.areaRecords.delete(id);
+  notify();
+}
+
+export async function upsertAreaRecords(rs: AreaRecord[]): Promise<void> {
+  await db.areaRecords.bulkPut(rs);
   notify();
 }
 

@@ -1,11 +1,11 @@
 import L from 'leaflet';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Circle, CircleMarker, Marker, Polyline, useMap } from 'react-leaflet';
+import { Circle, CircleMarker, Marker, Polygon, Polyline, useMap } from 'react-leaflet';
 import type { GeoState } from '../hooks/useGeolocation';
 import { STATUS_COLOR, isRevisitDue, pinStatus } from '../lib/records';
 import { CLASS_COLORS, type AreaScore } from '../lib/score';
 import { FACILITY_SHORT } from '../data/facilities';
-import type { Facility, FacilityCat, Pin, PinStatus, StoredRegion, TrackPoint, Visit } from '../types';
+import type { AreaRecord, Facility, FacilityCat, Pin, PinStatus, StoredRegion, TrackPoint, Visit } from '../types';
 import { trackSegments } from '../lib/track';
 
 // ---------- 町丁目の色分け ----------
@@ -201,6 +201,29 @@ export function TrackLayer({ points, color, live }: { points: TrackPoint[]; colo
       {!live && (
         <CircleMarker center={[last[0], last[1]]} radius={6} interactive={false} pathOptions={{ color, weight: 3, fillColor: '#fff', fillOpacity: 1 }} />
       )}
+    </>
+  );
+}
+
+// ---------- 範囲の営業記録 ----------
+
+export function AreaRecordLayer({ records, selectedId, onSelect }: { records: AreaRecord[]; selectedId: string | null; onSelect: (r: AreaRecord) => void }) {
+  return (
+    <>
+      {records.map((r) => (
+        <Polygon
+          key={r.id}
+          positions={r.polygon}
+          pathOptions={{
+            color: '#ea580c',
+            weight: r.id === selectedId ? 4 : 2.5,
+            dashArray: '6 4',
+            fillColor: '#f97316',
+            fillOpacity: r.id === selectedId ? 0.3 : 0.15,
+          }}
+          eventHandlers={{ click: (e) => { L.DomEvent.stopPropagation(e); onSelect(r); } }}
+        />
+      ))}
     </>
   );
 }

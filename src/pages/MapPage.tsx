@@ -4,7 +4,9 @@ import { AttributionControl, MapContainer, TileLayer, useMapEvents } from 'react
 import { AreaSheet } from '../components/AreaSheet';
 import { FilterSheet } from '../components/FilterSheet';
 import { FacilitySheet } from '../components/FacilitySheet';
-import { AreaLayer, FacilityLayer, LocationLayer, PinLayer, TrackLayer } from '../components/MapLayers';
+import { AreaLayer, AreaRecordLayer, FacilityLayer, LocationLayer, PinLayer, TrackLayer } from '../components/MapLayers';
+import { AreaRecordSheet } from '../components/AreaRecordSheet';
+import { DrawOverlay } from '../components/DrawOverlay';
 import { TrackListSheet, TrackSheet } from '../components/TrackSheet';
 import { trackName } from '../lib/track';
 import { RecordingBar } from '../components/RecordingBar';
@@ -19,7 +21,7 @@ import { isFilterActive, pinMatchesFilter } from '../lib/records';
 import { CLASS_COLORS, CLASS_LABELS } from '../lib/score';
 import { useStore } from '../store';
 import { BackupReminder } from '../components/BackupReminder';
-import type { Facility, Pin, Track, Visit } from '../types';
+import type { AreaRecord, Facility, Pin, Track, Visit } from '../types';
 
 function MapEvents({ onLongPress, onUserMove }: { onLongPress: (lat: number, lng: number) => void; onUserMove: () => void }) {
   useMapEvents({
@@ -42,6 +44,9 @@ export function MapPage() {
   const [showFilter, setShowFilter] = useState(false);
   const [showLegend, setShowLegend] = useState(false);
   const [regionMenu, setRegionMenu] = useState(false);
+  // ---- 範囲の営業記録 ----
+  const [drawing, setDrawing] = useState(false);
+  const [areaForm, setAreaForm] = useState<{ polygon: [number, number][]; record?: AreaRecord } | null>(null);
   // ---- 足跡 ----
   const [showTracks, setShowTracks] = useState(false);
   const [trackSheet, setTrackSheet] = useState<{ track: Track; justFinished?: boolean } | null>(null);
@@ -346,13 +351,31 @@ export function MapPage() {
             onSelect={(f) => { setSelectedArea(null); setSelectedPin(null); setSelectedFacility(f); }}
           />
           <PinLayer pins={visiblePins} visitsByPin={visitsByPin} onSelect={(p: Pin) => { setSelectedArea(null); setSelectedPin(p.id); }} />
+          <AreaRecordLayer
+            records={store.areaRecords}
+            selectedId={areaForm?.record?.id ?? null}
+            onSelect={(r) => { if (drawing) return; setSelectedArea(null); setSelectedPin(null); setAreaForm({ polygon: r.polygon, record: r }); }}
+          />
           {viewTrack && <TrackLayer points={viewTrack.points} color="#7c3aed" />}
           {recordingTrack && <TrackLayer points={recordingTrack.points} color="#dc2626" live />}
           {pos && <LocationLayer pos={pos} heading={compass} />}
           <MapEvents onLongPress={(lat, lng) => openNewPin(lat, lng, 'press')} onUserMove={() => setFollow(false)} />
         </MapContainer>
 
+        {drawing && (
+          <DrawOverlay
+            map={mapRef.current}
+            onDone={(polygon) => { setDrawing(false); setAreaForm({ polygon }); }}
+          />
+        )}
+
         <div className="map-chips">
+          {drawing && (
+            <span className="draw-hint">
+              指でなぞって範囲を囲んでください
+              <button onClick={() => setDrawing(false)}>やめる</button>
+            </span>
+          )}
           {recordingTrack ? (
             <RecordingBar track={recordingTrack} onStop={endTrack} />
           ) : (
@@ -385,6 +408,13 @@ export function MapPage() {
               <span>P</span><small>駐車場</small>
             </button>
           )}
+          <button
+            className={`fab${drawing ? ' on' : ''}`}
+            onClick={() => { setFollow(false); setSelectedArea(null); setSelectedPin(null); setDrawing((d) => !d); }}
+            aria-label="範囲を囲んで営業記録"
+          >
+            <span>✍️</span><small>範囲</small>
+          </button>
           <button className={`fab${recordingTrack || viewTrack ? ' on' : ''}`} onClick={() => setShowTracks(true)} aria-label="足跡の一覧">
             <span>👣</span><small>足跡</small>
           </button>
@@ -408,6 +438,9 @@ export function MapPage() {
             <div className="legend-row"><i className="dot" style={{ background: '#eab308' }} /> 不在(未接触)</div>
             <div className="legend-row"><i className="dot" style={{ background: '#f97316' }} /> 断られた</div>
             <div className="legend-row"><i className="dot" style={{ background: '#8b8f97' }} /> 再訪禁止</div>
+            {store.areaRecords.length > 0 && (
+              <div className="legend-row"><i style={{ background: 'rgba(249,115,22,.25)', borderColor: '#ea580c', borderStyle: 'dashed' }} /> 範囲の営業記録</div>
+            )}
             {(facilitySets.length > 0 || hasCustomParking) && (
               <>
                 <div className="legend-title" style={{ marginTop: 6 }}>駐車場のある店</div>
@@ -489,6 +522,14 @@ export function MapPage() {
           justFinished={trackSheet.justFinished}
           onClose={() => setTrackSheet(null)}
           onShowOnMap={() => showTrackOnMap(sheetTrack!)}
+        />
+      )}
+      {areaForm && (
+        <AreaRecordSheet
+          key={areaForm.record?.id ?? 'new'}
+          record={areaForm.record}
+          polygon={areaForm.polygon}
+          onClose={() => setAreaForm(null)}
         />
       )}
       {parkingAt && <ParkingForm lat={parkingAt.lat} lng={parkingAt.lng} onClose={() => setParkingAt(null)} />}

@@ -1,12 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { DEFAULT_REGION } from './config';
 import { downloadRegion, fetchRegionIndex } from './data/regions';
-import { listFacilityMarks, listFacilitySets, listPins, listRegions, listTracks, listVisits, loadSettings, onRecordsChange, requestPersistentStorage, storeSettings } from './data/repository';
+import { listAreaRecords, listFacilityMarks, listFacilitySets, listPins, listRegions, listTracks, listVisits, loadSettings, onRecordsChange, requestPersistentStorage, storeSettings } from './data/repository';
 import { DEFAULT_FILTER } from './lib/records';
 import { DEFAULT_WEIGHTS, scoreGroup, type AreaScore, type ScoreGroup } from './lib/score';
 import { FACILITY_CATS } from './data/facilities';
 import { useTrackRecorder } from './hooks/useTrackRecorder';
-import type { FacilityMark, Pin, Settings, StoredFacilities, StoredRegion, Track, Visit, Weights } from './types';
+import type { AreaRecord, FacilityMark, Pin, Settings, StoredFacilities, StoredRegion, Track, Visit, Weights } from './types';
 
 /** 前処理(scripts/preprocess.mjs)が出力する地域データの形式番号。これより古い保存データは自動で取り直す */
 const REGION_FORMAT = 2;
@@ -44,6 +44,8 @@ interface Store {
   facilityMarks: Map<string, FacilityMark>;
   /** 終了した足跡(新しい順) */
   tracks: Track[];
+  /** 範囲の営業記録(新しい順) */
+  areaRecords: AreaRecord[];
   /** 記録中の足跡 */
   recordingTrack: Track | null;
   startTrack: () => Promise<void>;
@@ -86,6 +88,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [facilitySets, setFacilitySets] = useState<StoredFacilities[]>([]);
   const [facilityMarks, setFacilityMarks] = useState<Map<string, FacilityMark>>(new Map());
   const [tracks, setTracks] = useState<Track[]>([]);
+  const [areaRecords, setAreaRecords] = useState<AreaRecord[]>([]);
   const [tab, setTab] = useState<Tab>('map');
   const [focusArea, setFocusArea] = useState<{ key: string; ts: number } | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -106,11 +109,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const reloadRecords = useCallback(async () => {
-    const [p, v, m, t] = await Promise.all([listPins(), listVisits(), listFacilityMarks(), listTracks()]);
+    const [p, v, m, t, ar] = await Promise.all([listPins(), listVisits(), listFacilityMarks(), listTracks(), listAreaRecords()]);
     setPins(p);
     setVisits(v);
     setFacilityMarks(new Map(m.map((x) => [x.id, x])));
     setTracks(t.filter((x) => x.endedAt != null));
+    setAreaRecords(ar);
   }, []);
 
   const recorder = useTrackRecorder(toast);
@@ -222,7 +226,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const value: Store = {
     settings, updateSettings, regions, regionsLoaded, reloadRegions, activeRegion,
     pins, visits, visitsByPin, facilitySets, reloadFacilities, facilityMarks,
-    tracks, recordingTrack: recorder.track, startTrack: recorder.start, stopTrack: recorder.stop, scoreByKey, activeGroup, avgLabel,
+    tracks, areaRecords, recordingTrack: recorder.track, startTrack: recorder.start, stopTrack: recorder.stop, scoreByKey, activeGroup, avgLabel,
     tab, setTab, focusArea, requestFocusArea, toast, toastMsg,
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

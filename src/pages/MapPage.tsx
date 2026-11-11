@@ -17,7 +17,7 @@ import { DEFAULT_CENTER, FACILITY_MIN_ZOOM, LOW_ACCURACY_M } from '../config';
 import { fetchRegionIndex } from '../data/regions';
 import { requestCompassPermission, useCompass, useGeolocation } from '../hooks/useGeolocation';
 import { bboxContains, distanceToBbox, featureBounds, locate } from '../lib/geo';
-import { isFilterActive, pinMatchesFilter } from '../lib/records';
+import { isFilterActive, periodStart, pinMatchesFilter } from '../lib/records';
 import { CLASS_COLORS, CLASS_LABELS } from '../lib/score';
 import { useStore } from '../store';
 import { BackupReminder } from '../components/BackupReminder';
@@ -197,6 +197,15 @@ export function MapPage() {
     }
     return { shownFacilities: shown, okFacilityIds: ok };
   }, [facilitySets, facilityMarks, settings.showFacilities, settings.facilityCats, settings.facilityMinSpaces]);
+  // ---- 絞り込みで出す足跡・範囲記録 ----
+  const { shownTracks, shownAreaRecords } = useMemo(() => {
+    const f = settings.filter;
+    const from = periodStart(f.recordPeriod);
+    return {
+      shownTracks: f.showTracks ? store.tracks.filter((t) => t.points.length > 1 && Date.parse(t.startedAt) >= from) : [],
+      shownAreaRecords: f.showAreaRecords ? store.areaRecords.filter((r) => Date.parse(r.recordedAt) >= from) : [],
+    };
+  }, [settings.filter, store.tracks, store.areaRecords]);
   const hasCustomParking = useMemo(() => [...facilityMarks.values()].some((m) => m.custom), [facilityMarks]);
   const [parkingAt, setParkingAt] = useState<{ lat: number; lng: number } | null>(null);
 
@@ -352,11 +361,14 @@ export function MapPage() {
           />
           <PinLayer pins={visiblePins} visitsByPin={visitsByPin} onSelect={(p: Pin) => { setSelectedArea(null); setSelectedPin(p.id); }} />
           <AreaRecordLayer
-            records={store.areaRecords}
+            records={shownAreaRecords}
             selectedId={areaForm?.record?.id ?? null}
             onSelect={(r) => { if (drawing) return; setSelectedArea(null); setSelectedPin(null); setAreaForm({ polygon: r.polygon, record: r }); }}
           />
-          {viewTrack && <TrackLayer points={viewTrack.points} color="#7c3aed" />}
+          {shownTracks.filter((t) => t.id !== viewTrack?.id).map((t) => (
+            <TrackLayer key={t.id} points={t.points} color="#8b5cf6" faded onSelect={() => !drawing && setTrackSheet({ track: t })} />
+          ))}
+          {viewTrack && <TrackLayer points={viewTrack.points} color="#7c3aed" onSelect={() => !drawing && setTrackSheet({ track: viewTrack })} />}
           {recordingTrack && <TrackLayer points={recordingTrack.points} color="#dc2626" live />}
           {pos && <LocationLayer pos={pos} heading={compass} />}
           <MapEvents onLongPress={(lat, lng) => openNewPin(lat, lng, 'press')} onUserMove={() => setFollow(false)} />
@@ -438,7 +450,10 @@ export function MapPage() {
             <div className="legend-row"><i className="dot" style={{ background: '#eab308' }} /> 不在(未接触)</div>
             <div className="legend-row"><i className="dot" style={{ background: '#f97316' }} /> 断られた</div>
             <div className="legend-row"><i className="dot" style={{ background: '#8b8f97' }} /> 再訪禁止</div>
-            {store.areaRecords.length > 0 && (
+            {shownTracks.length > 0 && (
+              <div className="legend-row"><i style={{ background: '#8b5cf6', height: 5, border: 0 }} /> 以前の足跡</div>
+            )}
+            {shownAreaRecords.length > 0 && (
               <div className="legend-row"><i style={{ background: 'rgba(249,115,22,.25)', borderColor: '#ea580c', borderStyle: 'dashed' }} /> 範囲の営業記録</div>
             )}
             {(facilitySets.length > 0 || hasCustomParking) && (
@@ -494,7 +509,7 @@ export function MapPage() {
         <div className="banner">位置情報が許可されていません。地図を長押しするとピンを追加できます。</div>
       )}
 
-      {showFilter && <FilterSheet onClose={() => setShowFilter(false)} shown={visiblePins.length} total={pins.length} />}
+      {showFilter && <FilterSheet onClose={() => setShowFilter(false)} shown={visiblePins.length} total={pins.length} trackCount={shownTracks.length} areaCount={shownAreaRecords.length} />}
       {selectedArea && !form && <AreaSheet areaKey={selectedArea} onClose={() => setSelectedArea(null)} />}
       {pinNow && !form && (
         <PinSheet

@@ -5,8 +5,8 @@ import { BottomSheet, Choice, Field, Toggle } from './ui';
 
 const STATUSES: PinStatus[] = ['success', 'talked', 'notmet', 'rejected', 'blocked'];
 
-export function FilterSheet({ onClose, shown, total }: { onClose: () => void; shown: number; total: number }) {
-  const { settings, updateSettings } = useStore();
+export function FilterSheet({ onClose, shown, total, trackCount, areaCount }: { onClose: () => void; shown: number; total: number; trackCount: number; areaCount: number }) {
+  const { settings, updateSettings, tracks, areaRecords } = useStore();
   const f = settings.filter;
   const set = (p: Partial<PinFilter>) => updateSettings({ filter: { ...f, ...p } });
 
@@ -15,7 +15,7 @@ export function FilterSheet({ onClose, shown, total }: { onClose: () => void; sh
 
   return (
     <BottomSheet
-      title={<span>ピンの絞り込み <small>{shown} / {total} 件を表示</small></span>}
+      title={<span>絞り込み・表示 <small>ピン {shown} / {total} 件</small></span>}
       onClose={onClose}
       footer={
         <div className="row-gap">
@@ -24,6 +24,7 @@ export function FilterSheet({ onClose, shown, total }: { onClose: () => void; sh
         </div>
       }
     >
+      <h4 className="sub-head" style={{ marginTop: 0 }}>ピン</h4>
       <Field label="結果" hint="未選択ならすべて">
         <div className="chips">
           {STATUSES.map((s) => (
@@ -60,6 +61,31 @@ export function FilterSheet({ onClose, shown, total }: { onClose: () => void; sh
         />
       </Field>
       <Toggle checked={f.revisitOnly} onChange={(v) => set({ revisitOnly: v })} label="再訪予定ありだけ表示" />
+
+      <h4 className="sub-head">足跡・範囲記録</h4>
+      <Toggle
+        checked={f.showTracks}
+        onChange={(v) => set({ showTracks: v })}
+        label={<>以前の足跡を表示 <small className="muted">{f.showTracks ? `${trackCount} / ${tracks.length}件` : `${tracks.length}件`}</small></>}
+      />
+      <Toggle
+        checked={f.showAreaRecords}
+        onChange={(v) => set({ showAreaRecords: v })}
+        label={<>範囲の営業記録を表示 <small className="muted">{f.showAreaRecords ? `${areaCount} / ${areaRecords.length}件` : `${areaRecords.length}件`}</small></>}
+      />
+      <Field label="期間(足跡・範囲記録の日付)">
+        <Choice
+          cols={5}
+          value={f.recordPeriod}
+          onChange={(v) => set({ recordPeriod: v ?? 'all' })}
+          disabled={!f.showTracks && !f.showAreaRecords}
+          options={[
+            { value: 'all', label: '全期間' }, { value: 'today', label: '今日' }, { value: 'week', label: '今週' },
+            { value: 'month', label: '今月' }, { value: '3months', label: '3か月' },
+          ]}
+        />
+      </Field>
+      <p className="muted small">足跡は紫の線、範囲記録はオレンジの点線で出ます。タップすると内容を見たり編集できます。</p>
     </BottomSheet>
   );
 }

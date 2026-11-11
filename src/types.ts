@@ -163,6 +163,12 @@ export interface PinFilter {
   competitor: 'all' | Competitor;
   period: 'all' | 'today' | 'week' | 'month' | '3months';
   revisitOnly: boolean;
+  /** 以前の足跡を地図に出す */
+  showTracks: boolean;
+  /** 範囲の営業記録を地図に出す */
+  showAreaRecords: boolean;
+  /** 足跡・範囲記録の期間 */
+  recordPeriod: 'all' | 'today' | 'week' | 'month' | '3months';
 }
 
 export interface Settings {

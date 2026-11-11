@@ -185,7 +185,9 @@ export function LocationLayer({ pos, heading }: { pos: GeoState; heading: number
 
 // ---------- 足跡 ----------
 
-export function TrackLayer({ points, color, live }: { points: TrackPoint[]; color: string; live?: boolean }) {
+export function TrackLayer({
+  points, color, live, faded, onSelect,
+}: { points: TrackPoint[]; color: string; live?: boolean; faded?: boolean; onSelect?: () => void }) {
   const segs = useMemo(() => trackSegments(points), [points]);
   if (!points.length) return null;
   const first = points[0];
@@ -194,7 +196,13 @@ export function TrackLayer({ points, color, live }: { points: TrackPoint[]; colo
     <>
       {segs.map((s, i) =>
         s.length > 1 ? (
-          <Polyline key={i} positions={s} interactive={false} pathOptions={{ color, weight: 5, opacity: 0.8, lineCap: 'round', lineJoin: 'round' }} />
+          <Polyline
+            key={i}
+            positions={s}
+            interactive={!!onSelect}
+            pathOptions={{ color, weight: faded ? 4 : 5, opacity: faded ? 0.55 : 0.8, lineCap: 'round', lineJoin: 'round' }}
+            eventHandlers={onSelect ? { click: (e) => { L.DomEvent.stopPropagation(e); onSelect(); } } : undefined}
+          />
         ) : null,
       )}
       <CircleMarker center={[first[0], first[1]]} radius={6} interactive={false} pathOptions={{ color: '#fff', weight: 2, fillColor: color, fillOpacity: 1 }} />

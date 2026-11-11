@@ -1,11 +1,12 @@
 import L from 'leaflet';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Circle, Marker, useMap } from 'react-leaflet';
+import { Circle, CircleMarker, Marker, Polyline, useMap } from 'react-leaflet';
 import type { GeoState } from '../hooks/useGeolocation';
 import { STATUS_COLOR, isRevisitDue, pinStatus } from '../lib/records';
 import { CLASS_COLORS, type AreaScore } from '../lib/score';
 import { FACILITY_SHORT } from '../data/facilities';
-import type { Facility, FacilityCat, Pin, PinStatus, StoredRegion, Visit } from '../types';
+import type { Facility, FacilityCat, Pin, PinStatus, StoredRegion, TrackPoint, Visit } from '../types';
+import { trackSegments } from '../lib/track';
 
 // ---------- 町丁目の色分け ----------
 
@@ -178,6 +179,28 @@ export function LocationLayer({ pos, heading }: { pos: GeoState; heading: number
         interactive={false}
       />
       <Marker ref={markerRef} position={[pos.lat, pos.lng]} icon={icon} interactive={false} zIndexOffset={1000} keyboard={false} />
+    </>
+  );
+}
+
+// ---------- 足跡 ----------
+
+export function TrackLayer({ points, color, live }: { points: TrackPoint[]; color: string; live?: boolean }) {
+  const segs = useMemo(() => trackSegments(points), [points]);
+  if (!points.length) return null;
+  const first = points[0];
+  const last = points[points.length - 1];
+  return (
+    <>
+      {segs.map((s, i) =>
+        s.length > 1 ? (
+          <Polyline key={i} positions={s} interactive={false} pathOptions={{ color, weight: 5, opacity: 0.8, lineCap: 'round', lineJoin: 'round' }} />
+        ) : null,
+      )}
+      <CircleMarker center={[first[0], first[1]]} radius={6} interactive={false} pathOptions={{ color: '#fff', weight: 2, fillColor: color, fillOpacity: 1 }} />
+      {!live && (
+        <CircleMarker center={[last[0], last[1]]} radius={6} interactive={false} pathOptions={{ color, weight: 3, fillColor: '#fff', fillOpacity: 1 }} />
+      )}
     </>
   );
 }

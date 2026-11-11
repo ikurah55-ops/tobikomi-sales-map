@@ -180,3 +180,22 @@ export interface Settings {
   facilityMinSpaces: number; // この台数以上の駐車場がある店だけ出す(登録済みの店は常に出す)
   facilityCats: FacilityCat[];
 }
+
+// ---------- 足跡(移動の記録) ----------
+
+/** [緯度, 経度, 時刻(ms), 精度(m)] */
+export type TrackPoint = [number, number, number, number];
+export type TrackFeel = 'good' | 'normal' | 'bad';
+
+/** 足跡記録1回分。訪問記録とは記録していた時間帯で結びつける */
+export interface Track {
+  id: string;
+  startedAt: string; // ISO
+  endedAt: string | null; // 記録中は null
+  points: TrackPoint[];
+  distanceM: number;
+  title: string;
+  feel: TrackFeel | null; // 手応え
+  memo: string;
+  updatedAt: string;
+}

@@ -1,6 +1,6 @@
-import type { FacilityMark, Pin, Visit } from '../types';
+import type { FacilityMark, Pin, Track, Visit } from '../types';
 import { COMPETITOR_LABEL, HOUSING_LABEL, PRESENCE_LABEL, REACTION_LABEL, WEATHER_LABEL } from '../lib/records';
-import { listFacilityMarks, listPins, listVisits, upsertFacilityMarks, upsertRecords } from './repository';
+import { listFacilityMarks, listPins, listTracks, listVisits, upsertFacilityMarks, upsertRecords, upsertTracks } from './repository';
 
 const APP_ID = 'tobikomi-sales-map';
 
@@ -23,8 +23,8 @@ const stamp = () => {
 };
 
 async function backupBody() {
-  const [pins, visits, facilityMarks] = await Promise.all([listPins(), listVisits(), listFacilityMarks()]);
-  return { count: visits.length, json: JSON.stringify({ app: APP_ID, version: 1, exportedAt: new Date().toISOString(), pins, visits, facilityMarks }, null, 1) };
+  const [pins, visits, facilityMarks, tracks] = await Promise.all([listPins(), listVisits(), listFacilityMarks(), listTracks()]);
+  return { count: visits.length, json: JSON.stringify({ app: APP_ID, version: 1, exportedAt: new Date().toISOString(), pins, visits, facilityMarks, tracks }, null, 1) };
 }
 
 export async function exportJson(): Promise<number> {
@@ -110,6 +110,9 @@ export async function importJson(file: File): Promise<{ pins: number; visits: nu
   // 店の登録(使える駐車場・消した店)は後から加えたので、古いバックアップにはない
   if (Array.isArray(data.facilityMarks)) {
     await upsertFacilityMarks((data.facilityMarks as FacilityMark[]).filter((m) => m && typeof m.id === 'string' && (m.status === 'ok' || m.status === 'hidden')));
+  }
+  if (Array.isArray(data.tracks)) {
+    await upsertTracks((data.tracks as Track[]).filter((x) => x && typeof x.id === 'string' && Array.isArray(x.points)));
   }
   return { pins: pins.length, visits: visits.length };
 }

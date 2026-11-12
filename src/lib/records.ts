@@ -79,13 +79,6 @@ export function pinMatchesFilter(pin: Pin, visits: Visit[], f: PinFilter): boole
   const st = pinStatus(pin, visits);
   if (f.statuses.length && !f.statuses.includes(st)) return false;
   const last = visits[visits.length - 1];
-  if (f.presence !== 'all') {
-    if (!last) return false;
-    if (f.presence === 'home' ? last.presence !== 'home' : last.presence === 'home') return false;
-  }
-  if (f.competitor !== 'all') {
-    if (!visits.some((v) => v.competitor === f.competitor)) return false;
-  }
   if (f.period !== 'all') {
     if (!last || new Date(last.visitedAt).getTime() < periodStart(f.period)) return false;
   }
@@ -93,12 +86,12 @@ export function pinMatchesFilter(pin: Pin, visits: Visit[], f: PinFilter): boole
   return true;
 }
 
-export const DEFAULT_FILTER: PinFilter = { statuses: [], presence: 'all', competitor: 'all', period: 'all', revisitOnly: false,
+export const DEFAULT_FILTER: PinFilter = { statuses: [], period: 'all', revisitOnly: false,
   showAreaRecords: true, recordPeriod: 'all',
 };
 
 export function isFilterActive(f: PinFilter): boolean {
-  return f.statuses.length > 0 || f.presence !== 'all' || f.competitor !== 'all' || f.period !== 'all' || f.revisitOnly;
+  return f.statuses.length > 0 || f.period !== 'all' || f.revisitOnly;
 }
 
 // ---------- 集計 ----------

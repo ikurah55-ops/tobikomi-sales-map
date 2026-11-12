@@ -159,8 +159,6 @@ export type PinStatus = 'success' | 'talked' | 'notmet' | 'rejected' | 'blocked'
 
 export interface PinFilter {
   statuses: PinStatus[]; // 空 = すべて
-  presence: 'all' | 'home' | 'away';
-  competitor: 'all' | Competitor;
   period: 'all' | 'today' | 'week' | 'month' | '3months';
   revisitOnly: boolean;
   /** 範囲の営業記録を地図に出す */

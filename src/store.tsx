@@ -5,7 +5,7 @@ import { listAreaRecords, listFacilityMarks, listFacilitySets, listPins, listReg
 import { DEFAULT_FILTER } from './lib/records';
 import { DEFAULT_WEIGHTS, scoreGroup, type AreaScore, type ScoreGroup } from './lib/score';
 import { FACILITY_CATS } from './data/facilities';
-import type { AreaRecord, FacilityMark, Pin, Settings, StoredFacilities, StoredRegion, Visit, Weights } from './types';
+import type { AreaRecord, FacilityMark, Pin, PinFilter, Settings, StoredFacilities, StoredRegion, Visit, Weights } from './types';
 
 /** 前処理(scripts/preprocess.mjs)が出力する地域データの形式番号。これより古い保存データは自動で取り直す */
 const REGION_FORMAT = 2;
@@ -67,6 +67,12 @@ export const useStore = () => {
   return s;
 };
 
+/** 旧版にあった「最新の訪問」「他社の営業」の絞り込みは削除したので、保存値から外す */
+function dropOldFilterKeys(f: PinFilter): PinFilter {
+  const { presence: _p, competitor: _c, ...rest } = f as PinFilter & { presence?: unknown; competitor?: unknown };
+  return rest;
+}
+
 /** 「山形市」→「市」平均 のように、比較範囲の呼び方 */
 const unitOf = (name: string) => (/[市町村区]$/.test(name) ? name.slice(-1) : '地域');
 
@@ -77,7 +83,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const w = saved?.weights as (Partial<Weights> & { femaleNonWork?: number }) | undefined;
     const weights = w && w.kids == null ? { ...DEFAULT_WEIGHTS, ...w, kids: w.femaleNonWork ?? DEFAULT_WEIGHTS.kids } : saved?.weights;
     if (weights) delete (weights as { femaleNonWork?: number }).femaleNonWork;
-    return { ...DEFAULT_SETTINGS, ...saved, ...(weights && { weights }), filter: { ...DEFAULT_FILTER, ...saved?.filter } };
+    return { ...DEFAULT_SETTINGS, ...saved, ...(weights && { weights }), filter: dropOldFilterKeys({ ...DEFAULT_FILTER, ...saved?.filter }) };
   });
   const [regions, setRegions] = useState<StoredRegion[]>([]);
   const [regionsLoaded, setRegionsLoaded] = useState(false);

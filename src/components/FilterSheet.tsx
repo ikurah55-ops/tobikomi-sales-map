@@ -34,21 +34,6 @@ export function FilterSheet({ onClose, shown, total, areaCount }: { onClose: () 
           ))}
         </div>
       </Field>
-      <Field label="最新の訪問">
-        <Choice
-          value={f.presence}
-          onChange={(v) => set({ presence: v ?? 'all' })}
-          options={[{ value: 'all', label: 'すべて' }, { value: 'home', label: '在宅' }, { value: 'away', label: '不在・応答なし' }]}
-        />
-      </Field>
-      <Field label="他社の営業">
-        <Choice
-          cols={4}
-          value={f.competitor}
-          onChange={(v) => set({ competitor: v ?? 'all' })}
-          options={[{ value: 'all', label: 'すべて' }, { value: 'yes', label: '来ていた' }, { value: 'no', label: '来ていない' }, { value: 'unknown', label: '不明' }]}
-        />
-      </Field>
       <Field label="期間(最新の訪問日)">
         <Choice
           cols={5}

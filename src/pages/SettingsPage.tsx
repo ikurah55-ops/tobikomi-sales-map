@@ -3,7 +3,8 @@ import { FacilitySettings } from '../components/FacilitySettings';
 import { Toggle } from '../components/ui';
 import { canShareFile, exportCsv, exportJson, importJson, lastBackupAt, shareJson } from '../data/backup';
 import { downloadRegion, fetchRegionIndex, formatSize, hasUpdate, type RegionIndex } from '../data/regions';
-import { deleteRegion } from '../data/repository';
+import { downloadFacilities, fetchFacilityIndex, type FacilityIndex } from '../data/facilities';
+import { deleteFacilitySet, deleteRegion } from '../data/repository';
 import { PREFECTURES } from '../lib/prefectures';
 import { AGE_TOP, INDICATOR_KEYS, INDICATOR_LABEL, PRESETS, adjustWeights, ageRangeLabel } from '../lib/score';
 import { isStandalone, useInstallPrompt } from '../hooks/useInstallPrompt';
@@ -14,7 +15,8 @@ const AGE_MIN = 5; // 25〜29歳
 const AGE_MAX = AGE_TOP; // 75歳以上
 
 export function SettingsPage() {
-  const { settings, updateSettings, regions, reloadRegions, toast, activeRegion, setTab } = useStore();
+  const { settings, updateSettings, regions, reloadRegions, toast, activeRegion, setTab, facilitySets, reloadFacilities } = useStore();
+  const [facIndex, setFacIndex] = useState<FacilityIndex | null>(null);
   const [index, setIndex] = useState<RegionIndex | null>(null);
   const [indexError, setIndexError] = useState<string | null>(null);
   const [pref, setPref] = useState('06');
@@ -26,18 +28,27 @@ export function SettingsPage() {
   const loadIndex = () => {
     setIndexError(null);
     fetchRegionIndex().then(setIndex).catch((e: Error) => setIndexError(e.message));
+    fetchFacilityIndex().then(setFacIndex).catch(() => setFacIndex({ regions: [] }));
   };
   useEffect(loadIndex, []);
 
   const setAge = (from: number, to: number) => updateSettings({ ageFrom: Math.min(from, to), ageTo: Math.max(from, to), preset: null });
   const setWeight = (k: IndicatorKey, v: number) => updateSettings({ weights: adjustWeights(settings.weights, k, v), preset: null });
 
+  const facEntry = (code: string) => facIndex?.regions.find((f) => f.code === code);
+  const facSet = (code: string) => facilitySets.find((f) => f.code === code);
+
+  // 地域データと、その市区町村の駐車場のある店データをセットで保存する
   const install = async (e: RegionIndexEntry) => {
     setBusy(e.code);
     try {
       await downloadRegion(e);
-      await reloadRegions();
-      toast(`${e.name}のデータを保存しました`);
+      // 店の一覧をまだ読めていなければ、ここで読む
+      const fi = facIndex ?? (await fetchFacilityIndex().catch(() => null));
+      const fe = fi?.regions.find((f) => f.code === e.code);
+      if (fe) await downloadFacilities(fe);
+      await Promise.all([reloadRegions(), reloadFacilities()]);
+      toast(fe ? `${e.name}の地域データと店データを保存しました` : `${e.name}のデータを保存しました`);
     } catch (err) {
       toast((err as Error).message);
     } finally {
@@ -46,10 +57,26 @@ export function SettingsPage() {
   };
 
   const remove = async (code: string, name: string) => {
-    if (!window.confirm(`${name}の地域データを端末から削除しますか?(訪問記録は消えません)`)) return;
+    if (!window.confirm(`${name}の地域データと店データを端末から削除しますか?(訪問記録や、登録した駐車場は消えません)`)) return;
     await deleteRegion(code);
-    await reloadRegions();
+    await deleteFacilitySet(code);
+    await Promise.all([reloadRegions(), reloadFacilities()]);
     toast(`${name}のデータを削除しました`);
+  };
+
+  // 以前に地域データだけ入れた市区町村の店データ(まとめて取得する)
+  const facMissing = regions.filter((r) => !facSet(r.code)).map((r) => facEntry(r.code)).filter((f) => !!f);
+  const installMissingFac = async () => {
+    setBusy('fac-missing');
+    try {
+      for (const f of facMissing) await downloadFacilities(f);
+      await reloadFacilities();
+      toast(`${facMissing.length}市区町村の店データを保存しました`);
+    } catch (err) {
+      toast((err as Error).message);
+    } finally {
+      setBusy(null);
+    }
   };
 
   const prefsWithData = new Set(index?.regions.map((r) => r.prefCode));
@@ -125,7 +152,9 @@ export function SettingsPage() {
         <ul className="region-list">
           {regions.map((r) => {
             const remote = index?.regions.find((e) => e.code === r.code);
-            const update = hasUpdate(r, remote);
+            const fs = facSet(r.code);
+            const fe = facEntry(r.code);
+            const update = hasUpdate(r, remote) || (!!fs && !!fe && fe.generatedAt > fs.generatedAt);
             return (
               <li key={r.code}>
                 <div className="region-info">
@@ -133,7 +162,9 @@ export function SettingsPage() {
                   {r.code === settings.activeRegion && <span className="tag tag-good">表示中</span>}
                   {r.isDummy && <span className="tag tag-warn">ダミー</span>}
                   {update && <span className="tag tag-info">更新あり</span>}
-                  <div className="muted small">{r.dataYear}年国勢調査 ・ {formatSize(r.size)} ・ {r.data.features.length}町丁目</div>
+                  <div className="muted small">
+                    {r.dataYear}年国勢調査 ・ {r.data.features.length}町丁目 ・ {fs ? `駐車場のある店 ${fs.data.facilities.length}店` : '店データなし'} ・ {formatSize(r.size + (fs?.size ?? 0))}
+                  </div>
                 </div>
                 <div className="region-actions">
                   {r.code !== settings.activeRegion && (
@@ -151,6 +182,11 @@ export function SettingsPage() {
           })}
           {!regions.length && <li className="muted">まだ地域がありません</li>}
         </ul>
+        {facMissing.length > 0 && (
+          <button className="btn btn-outline btn-block" style={{ marginTop: 10 }} disabled={!!busy} onClick={installMissingFac}>
+            {busy === 'fac-missing' ? '取得中…' : `駐車場のある店データを取得(${facMissing.length}市区町村)`}
+          </button>
+        )}
 
         <h4 className="sub-head">地域の追加</h4>
         {indexError ? (
@@ -176,7 +212,9 @@ export function SettingsPage() {
                     <div className="region-info">
                       <b>{e.name}</b>
                       {e.isDummy && <span className="tag tag-warn">ダミー</span>}
-                      <div className="muted small">{e.dataYear}年国勢調査 ・ {formatSize(e.size)} ・ {e.areaCount}町丁目</div>
+                      <div className="muted small">
+                        {e.dataYear}年国勢調査 ・ {e.areaCount}町丁目{facEntry(e.code) && ` ・ 駐車場のある店 ${facEntry(e.code)!.count}店`} ・ {formatSize(e.size + (facEntry(e.code)?.size ?? 0))}
+                      </div>
                     </div>
                     <div className="region-actions">
                       {have ? (
@@ -196,7 +234,7 @@ export function SettingsPage() {
         )}
       </section>
 
-      <FacilitySettings pref={pref} />
+      <FacilitySettings />
 
       <section className="panel">
         <h3>地図のボタンの大きさ <span className="value-pill">{settings.mapButtonScale ?? 100}%</span></h3>

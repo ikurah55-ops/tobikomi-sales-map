@@ -384,7 +384,7 @@ export function MapPage() {
         <div className="map-chips">
           {drawing && (
             <span className="draw-hint">
-              指でなぞって範囲を囲んでください
+              <span>1本指でなぞって範囲を囲む<br /><small>2本指で拡大・移動</small></span>
               <button onClick={() => setDrawing(false)}>やめる</button>
             </span>
           )}

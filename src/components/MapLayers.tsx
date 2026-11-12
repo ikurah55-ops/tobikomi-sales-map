@@ -1,10 +1,11 @@
 import L from 'leaflet';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { Circle, Marker, Polygon, useMap } from 'react-leaflet';
 import type { GeoState } from '../hooks/useGeolocation';
 import { STATUS_COLOR, isRevisitDue, pinStatus } from '../lib/records';
 import { CLASS_COLORS, type AreaScore } from '../lib/score';
 import { FACILITY_SHORT } from '../data/facilities';
+import { inRing } from '../lib/geo';
 import type { AreaRecord, Facility, FacilityCat, Pin, PinStatus, StoredRegion, Visit } from '../types';
 
 // ---------- 町丁目の色分け ----------
@@ -184,22 +185,58 @@ export function LocationLayer({ pos, heading }: { pos: GeoState; heading: number
 
 // ---------- 範囲の営業記録 ----------
 
+/** 吹き出しを置く地点: 範囲の真ん中(外れるときは真ん中に一番近い角) */
+function bubblePoint(poly: [number, number][]): [number, number] {
+  let s = 90, n = -90, w = 180, e = -180;
+  for (const [lat, lng] of poly) {
+    s = Math.min(s, lat); n = Math.max(n, lat); w = Math.min(w, lng); e = Math.max(e, lng);
+  }
+  const c: [number, number] = [(s + n) / 2, (w + e) / 2];
+  if (inRing(c[1], c[0], poly.map(([lat, lng]) => [lng, lat]))) return c;
+  return poly.reduce((best, p) => (Math.hypot(p[0] - c[0], p[1] - c[1]) < Math.hypot(best[0] - c[0], best[1] - c[1]) ? p : best), poly[0]);
+}
+
+function bubbleIcon(r: AreaRecord, selected: boolean): L.DivIcon {
+  const d = new Date(r.recordedAt);
+  const date = `${d.getMonth() + 1}/${d.getDate()}`;
+  const contract = r.contract > 0 ? `<i class="ab-good">成${r.contract}</i>` : `成0`;
+  return L.divIcon({
+    className: 'area-bubble-icon',
+    html: `<div class="area-bubble${selected ? ' on' : ''}"><b>${date}</b><span>訪${r.visited} 話${r.talked} 再${r.revisit} ${contract}</span></div>`,
+    iconSize: [0, 0],
+    iconAnchor: [0, 0],
+  });
+}
+
 export function AreaRecordLayer({ records, selectedId, onSelect }: { records: AreaRecord[]; selectedId: string | null; onSelect: (r: AreaRecord) => void }) {
+  const items = useMemo(
+    () => records.map((r) => ({ r, at: bubblePoint(r.polygon), icon: bubbleIcon(r, r.id === selectedId) })),
+    [records, selectedId],
+  );
   return (
     <>
-      {records.map((r) => (
-        <Polygon
-          key={r.id}
-          positions={r.polygon}
-          pathOptions={{
-            color: '#ea580c',
-            weight: r.id === selectedId ? 4 : 2.5,
-            dashArray: '6 4',
-            fillColor: '#f97316',
-            fillOpacity: r.id === selectedId ? 0.3 : 0.15,
-          }}
-          eventHandlers={{ click: (e) => { L.DomEvent.stopPropagation(e); onSelect(r); } }}
-        />
+      {items.map(({ r, at, icon }) => (
+        <Fragment key={r.id}>
+          <Polygon
+            positions={r.polygon}
+            pathOptions={{
+              color: '#ea580c',
+              weight: r.id === selectedId ? 4 : 2.5,
+              dashArray: '6 4',
+              fillColor: '#f97316',
+              fillOpacity: r.id === selectedId ? 0.3 : 0.15,
+            }}
+            eventHandlers={{ click: (e) => { L.DomEvent.stopPropagation(e); onSelect(r); } }}
+          />
+          {/* 吹き出し: 店のアイコンより手前に出してタップしやすくする */}
+          <Marker
+            position={at}
+            icon={icon}
+            zIndexOffset={2000}
+            keyboard={false}
+            eventHandlers={{ click: (e) => { L.DomEvent.stopPropagation(e); onSelect(r); } }}
+          />
+        </Fragment>
       ))}
     </>
   );

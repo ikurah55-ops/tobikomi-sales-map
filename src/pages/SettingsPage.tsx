@@ -239,12 +239,12 @@ export function SettingsPage() {
       <section className="panel">
         <h3>地図のボタンの大きさ <span className="value-pill">{settings.mapButtonScale ?? 100}%</span></h3>
         <input
-          type="range" min={50} max={200} step={10} value={settings.mapButtonScale ?? 100}
+          type="range" min={50} max={300} step={10} value={settings.mapButtonScale ?? 100}
           onChange={(e) => updateSettings({ mapButtonScale: +e.target.value })}
           aria-label="地図のボタンの大きさ"
           style={{ width: '100%' }}
         />
-        <div className="range-ticks"><span>50%</span><span>100%</span><span>150%</span><span>200%</span></div>
+        <div className="range-ticks"><span>50%</span><span>100%</span><span>150%</span><span>200%</span><span>250%</span><span>300%</span></div>
         <div className="btn-scale-preview" style={{ '--btn-scale': (settings.mapButtonScale ?? 100) / 100 } as React.CSSProperties}>
           <span className="fab"><span>🎨</span><small>色分け</small></span>
           <span className={`pin-here-btn${(settings.mapButtonScale ?? 100) >= 150 ? ' stacked' : ''}`}><span className="pin-here-icon">📍</span>現在地にピンを立てる</span>

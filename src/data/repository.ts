@@ -1,6 +1,6 @@
 // データの読み書きはすべてここを通す(将来 Supabase に移すときはこのファイルだけ差し替える)
 import Dexie, { type Table } from 'dexie';
-import type { AreaRecord, FacilityMark, Pin, Settings, StoredFacilities, StoredRegion, Track, Visit } from '../types';
+import type { AreaRecord, FacilityMark, Pin, Settings, StoredFacilities, StoredRegion, Visit } from '../types';
 
 class SalesDB extends Dexie {
   pins!: Table<Pin, string>;
@@ -8,7 +8,8 @@ class SalesDB extends Dexie {
   regions!: Table<StoredRegion, string>;
   facilities!: Table<StoredFacilities, string>;
   facilityMarks!: Table<FacilityMark, string>;
-  tracks!: Table<Track, string>;
+  // 旧「足跡記録」のデータ(機能は削除。端末に残っている分は消さずに置いている)
+  tracks!: Table<{ id: string }, string>;
   areaRecords!: Table<AreaRecord, string>;
 
   constructor() {
@@ -160,37 +161,6 @@ export async function clearHiddenFacilities(): Promise<number> {
 
 export async function upsertFacilityMarks(marks: FacilityMark[]): Promise<void> {
   await db.facilityMarks.bulkPut(marks);
-  notify();
-}
-
-// ---------- 足跡 ----------
-export async function listTracks(): Promise<Track[]> {
-  return db.tracks.orderBy('startedAt').reverse().toArray();
-}
-
-/** 記録中(終了していない)の足跡。アプリを開き直したときに続きから記録する */
-export async function getActiveTrack(): Promise<Track | null> {
-  const all = await db.tracks.filter((t) => t.endedAt == null).toArray();
-  return all.sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0] ?? null;
-}
-
-/** 記録中の点の追加など。頻繁に呼ぶので一覧の再読み込みは知らせない */
-export async function putTrackQuiet(t: Track): Promise<void> {
-  await db.tracks.put(t);
-}
-
-export async function saveTrack(t: Track): Promise<void> {
-  await db.tracks.put({ ...t, updatedAt: new Date().toISOString() });
-  notify();
-}
-
-export async function deleteTrack(id: string): Promise<void> {
-  await db.tracks.delete(id);
-  notify();
-}
-
-export async function upsertTracks(tracks: Track[]): Promise<void> {
-  await db.tracks.bulkPut(tracks);
   notify();
 }
 

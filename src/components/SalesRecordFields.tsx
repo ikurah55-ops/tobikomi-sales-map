@@ -46,7 +46,7 @@ function Counter({ value, onChange }: { value: number; onChange: (n: number) => 
   );
 }
 
-/** 範囲記録・足跡で共通の入力欄: 日時、4つの件数、メモ */
+/** 範囲記録の入力欄: 日時、4つの件数、メモ */
 export function SalesRecordFields({
   at, onAt, counts, onCounts, memo, onMemo, fromPins, fromPinsLabel,
 }: {

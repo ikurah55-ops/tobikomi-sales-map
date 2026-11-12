@@ -1,6 +1,6 @@
-import type { AreaRecord, FacilityMark, Pin, Track, Visit } from '../types';
+import type { AreaRecord, FacilityMark, Pin, Visit } from '../types';
 import { COMPETITOR_LABEL, HOUSING_LABEL, PRESENCE_LABEL, REACTION_LABEL, WEATHER_LABEL } from '../lib/records';
-import { listAreaRecords, listFacilityMarks, listPins, listTracks, listVisits, upsertAreaRecords, upsertFacilityMarks, upsertRecords, upsertTracks } from './repository';
+import { listAreaRecords, listFacilityMarks, listPins, listVisits, upsertAreaRecords, upsertFacilityMarks, upsertRecords } from './repository';
 
 const APP_ID = 'tobikomi-sales-map';
 
@@ -23,8 +23,8 @@ const stamp = () => {
 };
 
 async function backupBody() {
-  const [pins, visits, facilityMarks, tracks, areaRecords] = await Promise.all([listPins(), listVisits(), listFacilityMarks(), listTracks(), listAreaRecords()]);
-  return { count: visits.length, json: JSON.stringify({ app: APP_ID, version: 1, exportedAt: new Date().toISOString(), pins, visits, facilityMarks, tracks, areaRecords }, null, 1) };
+  const [pins, visits, facilityMarks, areaRecords] = await Promise.all([listPins(), listVisits(), listFacilityMarks(), listAreaRecords()]);
+  return { count: visits.length, json: JSON.stringify({ app: APP_ID, version: 1, exportedAt: new Date().toISOString(), pins, visits, facilityMarks, areaRecords }, null, 1) };
 }
 
 export async function exportJson(): Promise<number> {
@@ -110,9 +110,6 @@ export async function importJson(file: File): Promise<{ pins: number; visits: nu
   // 店の登録(使える駐車場・消した店)は後から加えたので、古いバックアップにはない
   if (Array.isArray(data.facilityMarks)) {
     await upsertFacilityMarks((data.facilityMarks as FacilityMark[]).filter((m) => m && typeof m.id === 'string' && (m.status === 'ok' || m.status === 'hidden')));
-  }
-  if (Array.isArray(data.tracks)) {
-    await upsertTracks((data.tracks as Track[]).filter((x) => x && typeof x.id === 'string' && Array.isArray(x.points)));
   }
   if (Array.isArray(data.areaRecords)) {
     await upsertAreaRecords((data.areaRecords as AreaRecord[]).filter((x) => x && typeof x.id === 'string' && Array.isArray(x.polygon)));

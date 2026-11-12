@@ -163,11 +163,9 @@ export interface PinFilter {
   competitor: 'all' | Competitor;
   period: 'all' | 'today' | 'week' | 'month' | '3months';
   revisitOnly: boolean;
-  /** 以前の足跡を地図に出す */
-  showTracks: boolean;
   /** 範囲の営業記録を地図に出す */
   showAreaRecords: boolean;
-  /** 足跡・範囲記録の期間 */
+  /** 範囲記録の期間 */
   recordPeriod: 'all' | 'today' | 'week' | 'month' | '3months';
 }
 
@@ -187,34 +185,12 @@ export interface Settings {
   facilityCats: FacilityCat[];
 }
 
-// ---------- 足跡(移動の記録) ----------
-
-/** [緯度, 経度, 時刻(ms), 精度(m)] */
-export type TrackPoint = [number, number, number, number];
-export type TrackFeel = 'good' | 'normal' | 'bad';
-
-/** 営業成果の件数(範囲記録・足跡で共通) */
+/** 営業成果の件数 */
 export interface SalesCounts {
   visited: number; // 訪問した件数
   talked: number; // 話ができた件数
   revisit: number; // 再訪の予約ができた件数
   contract: number; // 成約した件数
-}
-
-/** 足跡記録1回分。訪問記録とは記録していた時間帯で結びつける */
-export interface Track {
-  id: string;
-  startedAt: string; // ISO
-  endedAt: string | null; // 記録中は null
-  points: TrackPoint[];
-  distanceM: number;
-  title: string; // 旧版の名前(今は入力しない)
-  feel: TrackFeel | null; // 旧版の手応え(今は入力しない)
-  memo: string;
-  /** 営業成果。保存する前は undefined(訪問記録から数えて表示する) */
-  recordedAt?: string;
-  counts?: SalesCounts;
-  updatedAt: string;
 }
 
 // ---------- 範囲の営業記録(地図を指で囲って件数をまとめて記録) ----------

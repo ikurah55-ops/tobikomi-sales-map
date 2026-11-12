@@ -1,12 +1,11 @@
 import L from 'leaflet';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Circle, CircleMarker, Marker, Polygon, Polyline, useMap } from 'react-leaflet';
+import { Circle, Marker, Polygon, useMap } from 'react-leaflet';
 import type { GeoState } from '../hooks/useGeolocation';
 import { STATUS_COLOR, isRevisitDue, pinStatus } from '../lib/records';
 import { CLASS_COLORS, type AreaScore } from '../lib/score';
 import { FACILITY_SHORT } from '../data/facilities';
-import type { AreaRecord, Facility, FacilityCat, Pin, PinStatus, StoredRegion, TrackPoint, Visit } from '../types';
-import { trackSegments } from '../lib/track';
+import type { AreaRecord, Facility, FacilityCat, Pin, PinStatus, StoredRegion, Visit } from '../types';
 
 // ---------- 町丁目の色分け ----------
 
@@ -179,36 +178,6 @@ export function LocationLayer({ pos, heading }: { pos: GeoState; heading: number
         interactive={false}
       />
       <Marker ref={markerRef} position={[pos.lat, pos.lng]} icon={icon} interactive={false} zIndexOffset={1000} keyboard={false} />
-    </>
-  );
-}
-
-// ---------- 足跡 ----------
-
-export function TrackLayer({
-  points, color, live, faded, onSelect,
-}: { points: TrackPoint[]; color: string; live?: boolean; faded?: boolean; onSelect?: () => void }) {
-  const segs = useMemo(() => trackSegments(points), [points]);
-  if (!points.length) return null;
-  const first = points[0];
-  const last = points[points.length - 1];
-  return (
-    <>
-      {segs.map((s, i) =>
-        s.length > 1 ? (
-          <Polyline
-            key={i}
-            positions={s}
-            interactive={!!onSelect}
-            pathOptions={{ color, weight: faded ? 4 : 5, opacity: faded ? 0.55 : 0.8, lineCap: 'round', lineJoin: 'round' }}
-            eventHandlers={onSelect ? { click: (e) => { L.DomEvent.stopPropagation(e); onSelect(); } } : undefined}
-          />
-        ) : null,
-      )}
-      <CircleMarker center={[first[0], first[1]]} radius={6} interactive={false} pathOptions={{ color: '#fff', weight: 2, fillColor: color, fillOpacity: 1 }} />
-      {!live && (
-        <CircleMarker center={[last[0], last[1]]} radius={6} interactive={false} pathOptions={{ color, weight: 3, fillColor: '#fff', fillOpacity: 1 }} />
-      )}
     </>
   );
 }

@@ -4,12 +4,9 @@ import { AttributionControl, MapContainer, TileLayer, useMapEvents } from 'react
 import { AreaSheet } from '../components/AreaSheet';
 import { FilterSheet } from '../components/FilterSheet';
 import { FacilitySheet } from '../components/FacilitySheet';
-import { AreaLayer, AreaRecordLayer, FacilityLayer, LocationLayer, PinLayer, TrackLayer } from '../components/MapLayers';
+import { AreaLayer, AreaRecordLayer, FacilityLayer, LocationLayer, PinLayer } from '../components/MapLayers';
 import { AreaRecordSheet } from '../components/AreaRecordSheet';
 import { DrawOverlay } from '../components/DrawOverlay';
-import { TrackListSheet, TrackSheet } from '../components/TrackSheet';
-import { trackName } from '../lib/track';
-import { RecordingBar } from '../components/RecordingBar';
 import { ParkingForm } from '../components/ParkingForm';
 import { PinSheet } from '../components/PinSheet';
 import { VisitForm, type VisitFormTarget } from '../components/VisitForm';
@@ -21,7 +18,7 @@ import { isFilterActive, periodStart, pinMatchesFilter } from '../lib/records';
 import { CLASS_COLORS, CLASS_LABELS } from '../lib/score';
 import { useStore } from '../store';
 import { BackupReminder } from '../components/BackupReminder';
-import type { AreaRecord, Facility, Pin, Track, Visit } from '../types';
+import type { AreaRecord, Facility, Pin, Visit } from '../types';
 
 function MapEvents({ onLongPress, onUserMove }: { onLongPress: (lat: number, lng: number) => void; onUserMove: () => void }) {
   useMapEvents({
@@ -34,7 +31,7 @@ function MapEvents({ onLongPress, onUserMove }: { onLongPress: (lat: number, lng
 
 export function MapPage() {
   const store = useStore();
-  const { settings, updateSettings, regions, activeRegion, pins, visitsByPin, scoreByKey, toast, tab, focusArea, facilitySets, facilityMarks, recordingTrack, startTrack, stopTrack } = store;
+  const { settings, updateSettings, regions, activeRegion, pins, visitsByPin, scoreByKey, toast, tab, focusArea, facilitySets, facilityMarks } = store;
   const mapRef = useRef<L.Map | null>(null);
   const [follow, setFollow] = useState(false);
   const [selectedArea, setSelectedArea] = useState<string | null>(null);
@@ -47,13 +44,6 @@ export function MapPage() {
   // ---- 範囲の営業記録 ----
   const [drawing, setDrawing] = useState(false);
   const [areaForm, setAreaForm] = useState<{ polygon: [number, number][]; record?: AreaRecord } | null>(null);
-  // ---- 足跡 ----
-  const [showTracks, setShowTracks] = useState(false);
-  const [trackSheet, setTrackSheet] = useState<{ track: Track; justFinished?: boolean } | null>(null);
-  const [viewTrackId, setViewTrack] = useState<Track | null>(null);
-  // 保存・削除のあとも最新の内容を出す
-  const viewTrack = viewTrackId ? store.tracks.find((t) => t.id === viewTrackId.id) ?? null : null;
-  const sheetTrack = trackSheet ? store.tracks.find((t) => t.id === trackSheet.track.id) ?? trackSheet.track : null;
 
   const locOn = settings.locationChoice === 'allowed';
   const { pos, status } = useGeolocation(locOn);
@@ -197,15 +187,12 @@ export function MapPage() {
     }
     return { shownFacilities: shown, okFacilityIds: ok };
   }, [facilitySets, facilityMarks, settings.showFacilities, settings.facilityCats, settings.facilityMinSpaces]);
-  // ---- 絞り込みで出す足跡・範囲記録 ----
-  const { shownTracks, shownAreaRecords } = useMemo(() => {
+  // ---- 絞り込みで出す範囲記録 ----
+  const shownAreaRecords = useMemo(() => {
     const f = settings.filter;
     const from = periodStart(f.recordPeriod);
-    return {
-      shownTracks: f.showTracks ? store.tracks.filter((t) => t.points.length > 1 && Date.parse(t.startedAt) >= from) : [],
-      shownAreaRecords: f.showAreaRecords ? store.areaRecords.filter((r) => Date.parse(r.recordedAt) >= from) : [],
-    };
-  }, [settings.filter, store.tracks, store.areaRecords]);
+    return f.showAreaRecords ? store.areaRecords.filter((r) => Date.parse(r.recordedAt) >= from) : [];
+  }, [settings.filter, store.areaRecords]);
   const hasCustomParking = useMemo(() => [...facilityMarks.values()].some((m) => m.custom), [facilityMarks]);
   const [parkingAt, setParkingAt] = useState<{ lat: number; lng: number } | null>(null);
 
@@ -241,34 +228,6 @@ export function MapPage() {
     await requestCompassPermission();
     if (pos && mapRef.current) mapRef.current.setView([pos.lat, pos.lng], Math.max(mapRef.current.getZoom(), 16));
     setFollow((f) => !f);
-  };
-
-  const beginTrack = async () => {
-    setShowTracks(false);
-    setViewTrack(null);
-    if (!('geolocation' in navigator)) {
-      toast('この端末では位置情報が使えないため、足跡を記録できません');
-      return;
-    }
-    if (settings.locationChoice !== 'allowed') updateSettings({ locationChoice: 'allowed' });
-    await startTrack();
-    if (pos && mapRef.current) mapRef.current.setView([pos.lat, pos.lng], Math.max(mapRef.current.getZoom(), 16));
-    setFollow(true);
-    toast('足跡の記録を始めました');
-  };
-
-  const endTrack = async () => {
-    const t = await stopTrack();
-    if (t) setTrackSheet({ track: t, justFinished: true });
-  };
-
-  const showTrackOnMap = (t: Track) => {
-    setTrackSheet(null);
-    setShowTracks(false);
-    setFollow(false);
-    setViewTrack(t);
-    const map = mapRef.current;
-    if (map && t.points.length) map.fitBounds(t.points.map((p) => [p[0], p[1]] as [number, number]), { paddingTopLeft: [30, 70], paddingBottomRight: [80, 130], maxZoom: 17 });
   };
 
   const center: [number, number] = activeRegion ? activeRegion.center : DEFAULT_CENTER;
@@ -365,11 +324,6 @@ export function MapPage() {
             selectedId={areaForm?.record?.id ?? null}
             onSelect={(r) => { if (drawing) return; setSelectedArea(null); setSelectedPin(null); setAreaForm({ polygon: r.polygon, record: r }); }}
           />
-          {shownTracks.filter((t) => t.id !== viewTrack?.id).map((t) => (
-            <TrackLayer key={t.id} points={t.points} color="#8b5cf6" faded onSelect={() => !drawing && setTrackSheet({ track: t })} />
-          ))}
-          {viewTrack && <TrackLayer points={viewTrack.points} color="#7c3aed" onSelect={() => !drawing && setTrackSheet({ track: viewTrack })} />}
-          {recordingTrack && <TrackLayer points={recordingTrack.points} color="#dc2626" live />}
           {pos && <LocationLayer pos={pos} heading={compass} />}
           <MapEvents onLongPress={(lat, lng) => !drawing && openNewPin(lat, lng, 'press')} onUserMove={() => setFollow(false)} />
         </MapContainer>
@@ -386,17 +340,6 @@ export function MapPage() {
             <span className="draw-hint">
               <span>1本指でなぞって範囲を囲む<br /><small>2本指で拡大・移動</small></span>
               <button onClick={() => setDrawing(false)}>やめる</button>
-            </span>
-          )}
-          {recordingTrack ? (
-            <RecordingBar track={recordingTrack} onStop={endTrack} />
-          ) : (
-            <button className="track-start-btn" onClick={beginTrack}>👣 足跡記録開始</button>
-          )}
-          {viewTrack && (
-            <span className="chip-note track-chip">
-              <button onClick={() => setTrackSheet({ track: viewTrack })}>👣 {trackName(viewTrack)}</button>
-              <button onClick={() => setViewTrack(null)} aria-label="足跡を消す">✕</button>
             </span>
           )}
           {dummy && <span className="chip-note">ダミーデータ表示中</span>}
@@ -427,9 +370,6 @@ export function MapPage() {
           >
             <span>✍️</span><small>範囲</small>
           </button>
-          <button className={`fab${recordingTrack || viewTrack ? ' on' : ''}`} onClick={() => setShowTracks(true)} aria-label="足跡の一覧">
-            <span>👣</span><small>足跡</small>
-          </button>
           <button className={`fab${showLegend ? ' on' : ''}`} onClick={() => setShowLegend((s) => !s)} aria-label="凡例">
             <span>≡</span><small>凡例</small>
           </button>
@@ -450,9 +390,6 @@ export function MapPage() {
             <div className="legend-row"><i className="dot" style={{ background: '#eab308' }} /> 不在(未接触)</div>
             <div className="legend-row"><i className="dot" style={{ background: '#f97316' }} /> 断られた</div>
             <div className="legend-row"><i className="dot" style={{ background: '#8b8f97' }} /> 再訪禁止</div>
-            {shownTracks.length > 0 && (
-              <div className="legend-row"><i style={{ background: '#8b5cf6', height: 5, border: 0 }} /> 以前の足跡</div>
-            )}
             {shownAreaRecords.length > 0 && (
               <div className="legend-row"><i style={{ background: 'rgba(249,115,22,.25)', borderColor: '#ea580c', borderStyle: 'dashed' }} /> 範囲の営業記録</div>
             )}
@@ -486,7 +423,7 @@ export function MapPage() {
               <li>今いる<b>町丁目の名前とスコア</b>を画面上部に出します</li>
               <li>「現在地にピンを立てる」で、訪問した家の位置を記録します</li>
             </ul>
-            <p className="muted small">位置情報はこの端末の中だけで使い、外部には送りません。移動の軌跡は「足跡記録」を開始したときだけ保存します。アプリを閉じている間は取得しません。</p>
+            <p className="muted small">位置情報はこの端末の中だけで使い、外部には送りません。移動の軌跡も保存しません。アプリを閉じている間は取得しません。</p>
             <button
               className="btn btn-primary btn-block btn-lg"
               onClick={async () => {
@@ -509,7 +446,7 @@ export function MapPage() {
         <div className="banner">位置情報が許可されていません。地図を長押しするとピンを追加できます。</div>
       )}
 
-      {showFilter && <FilterSheet onClose={() => setShowFilter(false)} shown={visiblePins.length} total={pins.length} trackCount={shownTracks.length} areaCount={shownAreaRecords.length} />}
+      {showFilter && <FilterSheet onClose={() => setShowFilter(false)} shown={visiblePins.length} total={pins.length} areaCount={shownAreaRecords.length} />}
       {selectedArea && !form && <AreaSheet areaKey={selectedArea} onClose={() => setSelectedArea(null)} />}
       {pinNow && !form && (
         <PinSheet
@@ -527,16 +464,6 @@ export function MapPage() {
           target={form}
           onClose={() => setForm(null)}
           onRegisterParking={form.kind === 'new' ? () => { setParkingAt({ lat: form.lat, lng: form.lng }); setForm(null); } : undefined}
-        />
-      )}
-      {showTracks && <TrackListSheet onClose={() => setShowTracks(false)} onStart={beginTrack} onOpen={(t) => { setShowTracks(false); setTrackSheet({ track: t }); }} />}
-      {trackSheet && (
-        <TrackSheet
-          key={trackSheet.track.id}
-          track={sheetTrack!}
-          justFinished={trackSheet.justFinished}
-          onClose={() => setTrackSheet(null)}
-          onShowOnMap={() => showTrackOnMap(sheetTrack!)}
         />
       )}
       {areaForm && (

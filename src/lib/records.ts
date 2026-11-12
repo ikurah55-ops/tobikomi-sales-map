@@ -94,7 +94,7 @@ export function pinMatchesFilter(pin: Pin, visits: Visit[], f: PinFilter): boole
 }
 
 export const DEFAULT_FILTER: PinFilter = { statuses: [], presence: 'all', competitor: 'all', period: 'all', revisitOnly: false,
-  showTracks: false, showAreaRecords: true, recordPeriod: 'all',
+  showAreaRecords: true, recordPeriod: 'all',
 };
 
 export function isFilterActive(f: PinFilter): boolean {

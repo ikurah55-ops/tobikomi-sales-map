@@ -263,7 +263,7 @@ export function MapPage() {
   const filterOn = isFilterActive(settings.filter);
 
   return (
-    <div className="map-page">
+    <div className="map-page" style={{ '--btn-scale': (settings.mapButtonScale ?? 100) / 100 } as React.CSSProperties}>
       <header className="map-header">
         <button className="region-btn" onClick={() => setRegionMenu((m) => !m)}>
           {activeRegion?.name ?? '地域なし'} <span className="caret">▼</span>
@@ -434,7 +434,7 @@ export function MapPage() {
           <button className={`fab fab-locate${follow ? ' on' : ''}`} onClick={toggleFollow} aria-label="現在地に追従">
             <span>{follow ? '◉' : '◎'}</span><small>{follow ? '追従中' : '現在地'}</small>
           </button>
-          <button className="pin-here-btn" onClick={pinHere}>
+          <button className={`pin-here-btn${(settings.mapButtonScale ?? 100) >= 150 ? ' stacked' : ''}`} onClick={pinHere}>
             <span className="pin-here-icon">📍</span>
             現在地にピンを立てる
           </button>

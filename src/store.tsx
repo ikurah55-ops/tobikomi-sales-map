@@ -29,6 +29,7 @@ const DEFAULT_SETTINGS: Settings = {
   showFacilities: true,
   facilityMinSpaces: 30,
   facilityCats: FACILITY_CATS,
+  mapButtonScale: 100,
 };
 
 interface Store {

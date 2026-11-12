@@ -181,6 +181,7 @@ export interface Settings {
   showFacilities: boolean;
   facilityMinSpaces: number; // この台数以上の駐車場がある店だけ出す(登録済みの店は常に出す)
   facilityCats: FacilityCat[];
+  mapButtonScale: number; // 地図のボタンの大きさ(%、50〜200)
 }
 
 /** 営業成果の件数 */

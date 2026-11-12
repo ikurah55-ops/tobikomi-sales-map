@@ -199,6 +199,25 @@ export function SettingsPage() {
       <FacilitySettings pref={pref} />
 
       <section className="panel">
+        <h3>地図のボタンの大きさ <span className="value-pill">{settings.mapButtonScale ?? 100}%</span></h3>
+        <input
+          type="range" min={50} max={200} step={10} value={settings.mapButtonScale ?? 100}
+          onChange={(e) => updateSettings({ mapButtonScale: +e.target.value })}
+          aria-label="地図のボタンの大きさ"
+          style={{ width: '100%' }}
+        />
+        <div className="range-ticks"><span>50%</span><span>100%</span><span>150%</span><span>200%</span></div>
+        <div className="btn-scale-preview" style={{ '--btn-scale': (settings.mapButtonScale ?? 100) / 100 } as React.CSSProperties}>
+          <span className="fab"><span>🎨</span><small>色分け</small></span>
+          <span className={`pin-here-btn${(settings.mapButtonScale ?? 100) >= 150 ? ' stacked' : ''}`}><span className="pin-here-icon">📍</span>現在地にピンを立てる</span>
+        </div>
+        <div className="row-gap" style={{ marginTop: 8 }}>
+          <button className="btn btn-outline" onClick={() => updateSettings({ mapButtonScale: 100 })} disabled={(settings.mapButtonScale ?? 100) === 100}>100%に戻す</button>
+        </div>
+        <p className="muted small">「色分け」「絞込」「駐車場」「範囲」「凡例」「現在地」「現在地にピンを立てる」の大きさが変わります。</p>
+      </section>
+
+      <section className="panel">
         <h3>位置情報</h3>
         <Toggle
           checked={settings.locationChoice === 'allowed'}

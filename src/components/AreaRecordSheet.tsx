@@ -9,8 +9,8 @@ import { BottomSheet } from './ui';
 
 /** 囲んだ範囲の営業記録(新規・編集) */
 export function AreaRecordSheet({
-  record, polygon, onClose,
-}: { record?: AreaRecord; polygon: [number, number][]; onClose: () => void }) {
+  record, polygon, onClose, onShowOnMap,
+}: { record?: AreaRecord; polygon: [number, number][]; onClose: () => void; onShowOnMap?: () => void }) {
   const { toast, pins, visitsByPin } = useStore();
   const [at, setAt] = useState(() => toLocalInput(record ? new Date(record.recordedAt) : new Date()));
   const [c, setC] = useState<SalesCounts>({
@@ -58,7 +58,16 @@ export function AreaRecordSheet({
       title={record ? '範囲の営業記録' : '囲んだ範囲の営業記録'}
       onClose={onClose}
       tall
-      footer={<button className="btn btn-primary btn-block btn-lg" onClick={save}>{record ? '更新' : '保存'}</button>}
+      footer={
+        onShowOnMap ? (
+          <div className="row-gap">
+            <button className="btn btn-outline grow" onClick={onShowOnMap}>地図で見る</button>
+            <button className="btn btn-primary grow" onClick={save}>更新</button>
+          </div>
+        ) : (
+          <button className="btn btn-primary btn-block btn-lg" onClick={save}>{record ? '更新' : '保存'}</button>
+        )
+      }
     >
       <SalesRecordFields
         at={at}

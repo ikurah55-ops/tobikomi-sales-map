@@ -10,7 +10,10 @@ import type { AreaRecord, FacilityMark, Pin, Settings, StoredFacilities, StoredR
 /** 前処理(scripts/preprocess.mjs)が出力する地域データの形式番号。これより古い保存データは自動で取り直す */
 const REGION_FORMAT = 2;
 
-export type Tab = 'map' | 'ranking' | 'analysis' | 'settings';
+export type Tab = 'map' | 'ranking' | 'history' | 'settings';
+
+/** 履歴から地図へ移動するときの行き先 */
+export type MapFocus = { kind: 'pin' | 'area'; id: string; ts: number };
 
 const DEFAULT_SETTINGS: Settings = {
   ageFrom: 6,
@@ -50,6 +53,8 @@ interface Store {
   setTab: (t: Tab) => void;
   focusArea: { key: string; ts: number } | null;
   requestFocusArea: (key: string) => void;
+  mapFocus: MapFocus | null;
+  requestMapFocus: (t: Omit<MapFocus, 'ts'>) => void;
   toast: (msg: string) => void;
   toastMsg: string | null;
 }
@@ -83,6 +88,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [areaRecords, setAreaRecords] = useState<AreaRecord[]>([]);
   const [tab, setTab] = useState<Tab>('map');
   const [focusArea, setFocusArea] = useState<{ key: string; ts: number } | null>(null);
+  const [mapFocus, setMapFocus] = useState<MapFocus | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
 
@@ -207,6 +213,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const activeGroup = (settings.scope === 'all' ? groups.get('all') : groups.get(settings.activeRegion ?? '')) ?? null;
   const avgLabel = settings.scope === 'all' ? '全地域' : activeRegion ? unitOf(activeRegion.name) : '市';
 
+  const requestMapFocus = useCallback((t: Omit<MapFocus, 'ts'>) => {
+    setMapFocus({ ...t, ts: Date.now() });
+    setTab('map');
+  }, []);
+
   const requestFocusArea = useCallback((key: string) => {
     setFocusArea({ key, ts: Date.now() });
     setTab('map');
@@ -216,7 +227,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     settings, updateSettings, regions, regionsLoaded, reloadRegions, activeRegion,
     pins, visits, visitsByPin, facilitySets, reloadFacilities, facilityMarks,
     areaRecords, scoreByKey, activeGroup, avgLabel,
-    tab, setTab, focusArea, requestFocusArea, toast, toastMsg,
+    tab, setTab, focusArea, requestFocusArea, mapFocus, requestMapFocus, toast, toastMsg,
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

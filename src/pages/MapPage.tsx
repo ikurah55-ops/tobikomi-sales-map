@@ -120,6 +120,33 @@ export function MapPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusArea]);
 
+  // 履歴から「地図で見る」を押したとき
+  const { mapFocus } = store;
+  useEffect(() => {
+    if (!mapFocus || Date.now() - mapFocus.ts > 2000) return;
+    const map = mapRef.current;
+    setFollow(false);
+    setSelectedArea(null);
+    setSelectedFacility(null);
+    if (mapFocus.kind === 'pin') {
+      const p = pins.find((x) => x.id === mapFocus.id);
+      if (!p) return;
+      if (p.regionCode && p.regionCode !== settings.activeRegion) switchRegion(p.regionCode, false);
+      pendingFly.current = null;
+      setSelectedPin(p.id);
+      setTimeout(() => map?.setView([p.lat, p.lng], Math.max(map.getZoom(), 17)), 80);
+    } else {
+      const r = store.areaRecords.find((x) => x.id === mapFocus.id);
+      if (!r) return;
+      pendingFly.current = null;
+      setSelectedPin(null);
+      if (!settings.filter.showAreaRecords) updateSettings({ filter: { ...settings.filter, showAreaRecords: true } });
+      setAreaForm({ polygon: r.polygon, record: r });
+      setTimeout(() => map?.fitBounds(r.polygon, { paddingTopLeft: [30, 70], paddingBottomRight: [80, 300], maxZoom: 17 }), 80);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapFocus]);
+
   // 現在地のある地域へ自動で切り替える(地域をまたいだときだけ)
   const lastHereRegion = useRef<string | null>(null);
   const suggested = useRef(false);

@@ -1,14 +1,26 @@
-import type L from 'leaflet';
-import { useRef, useState, type PointerEvent } from 'react';
+import L from 'leaflet';
+import { useEffect, useRef, useState, type PointerEvent } from 'react';
 
 /**
  * 範囲を囲むモード。地図の上に重ねて、指(マウス)でなぞった線を集める。
- * 指を離したら囲んだ範囲を [緯度, 経度] の並びで返す。地図の移動はこの間止まる。
+ * 指を離したら囲んだ範囲を地図に描いて確定するか聞き、「はい」で [緯度, 経度] の並びを返す。
+ * なぞっている間は地図が動かない。確認中は地図の上に描くので、ピンチ・ズームで縮尺を変えられる。
  */
 export function DrawOverlay({ map, onDone }: { map: L.Map | null; onDone: (polygon: [number, number][]) => void }) {
   const [pts, setPts] = useState<[number, number][]>([]);
+  // 描き終えて確認中の範囲 [緯度, 経度]
+  const [pending, setPending] = useState<[number, number][] | null>(null);
   const active = useRef<number | null>(null);
   const box = useRef<HTMLDivElement>(null);
+
+  // 確認中の範囲は地図のレイヤーとして描く(拡大・縮小に追従する)
+  useEffect(() => {
+    if (!map || !pending) return;
+    const layer = L.polygon(pending, { color: '#ea580c', weight: 4, fillColor: '#f97316', fillOpacity: 0.28, interactive: false }).addTo(map);
+    return () => {
+      layer.remove();
+    };
+  }, [map, pending]);
 
   const local = (e: PointerEvent): [number, number] => {
     const r = box.current!.getBoundingClientRect();
@@ -51,7 +63,7 @@ export function DrawOverlay({ map, onDone }: { map: L.Map | null; onDone: (polyg
       const last = kept[kept.length - 1];
       if (!last || Math.hypot(p[0] - last[0], p[1] - last[1]) >= 10) kept.push(p);
     }
-    onDone(
+    setPending(
       kept.map(([x, y]) => {
         const ll = map.containerPointToLatLng([x, y]);
         return [Math.round(ll.lat * 1e6) / 1e6, Math.round(ll.lng * 1e6) / 1e6];
@@ -62,10 +74,10 @@ export function DrawOverlay({ map, onDone }: { map: L.Map | null; onDone: (polyg
   return (
     <div
       ref={box}
-      className="draw-overlay"
-      onPointerDown={down}
-      onPointerMove={move}
-      onPointerUp={up}
+      className={`draw-overlay${pending ? ' confirming' : ''}`}
+      onPointerDown={pending ? undefined : down}
+      onPointerMove={pending ? undefined : move}
+      onPointerUp={pending ? undefined : up}
       onPointerCancel={() => {
         active.current = null;
         setPts([]);
@@ -76,6 +88,24 @@ export function DrawOverlay({ map, onDone }: { map: L.Map | null; onDone: (polyg
           <polygon points={pts.map((p) => p.join(',')).join(' ')} fill="rgba(234,88,12,.18)" stroke="#ea580c" strokeWidth={3} strokeLinejoin="round" strokeDasharray="8 5" />
         )}
       </svg>
+      {pending && (
+        <div className="draw-confirm">
+          <p>この範囲で確定しますか?</p>
+          <p className="muted small">ピンチ・ズームで縮尺を変えて確かめられます</p>
+          <div className="row-gap">
+            <button className="btn btn-outline grow" onClick={() => setPending(null)}>修正する</button>
+            <button
+              className="btn btn-primary grow"
+              onClick={() => {
+                onDone(pending);
+                setPending(null);
+              }}
+            >
+              はい
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

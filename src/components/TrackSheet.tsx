@@ -1,93 +1,62 @@
 import { useMemo, useState } from 'react';
 import { deleteTrack, saveTrack } from '../data/repository';
 import { formatDateTime } from '../lib/records';
-import { formatDistance, formatDuration, trackEndMs, trackName, trackStats, visitsInTrack } from '../lib/track';
+import { formatDistance, formatDuration, trackEndMs, trackName, visitsInTrack } from '../lib/track';
 import { useStore } from '../store';
-import type { Track, TrackFeel } from '../types';
-import { BottomSheet, Choice, Field, PRIVACY_NOTE, type Option } from './ui';
+import type { SalesCounts, Track, Visit } from '../types';
+import { SalesRecordFields, countVisits, toLocalInput } from './SalesRecordFields';
+import { BottomSheet } from './ui';
 
-const FEEL_OPTS: Option<TrackFeel>[] = [
-  { value: 'good', label: '😊 良かった', tone: 'good' },
-  { value: 'normal', label: '😐 ふつう', tone: 'info' },
-  { value: 'bad', label: '😞 いまいち', tone: 'warn' },
-];
-export const FEEL_ICON: Record<TrackFeel, string> = { good: '😊', normal: '😐', bad: '😞' };
+/** 足跡の成果。保存していなければ、記録していた時間の訪問記録から数える */
+export const trackCounts = (t: Track, visits: Visit[]): SalesCounts => t.counts ?? countVisits(visitsInTrack(t, visits));
 
-/** 足跡の成果: 記録していた時間の訪問をまとめて表示し、手応えとメモを一緒に保存する */
+/** 足跡の営業記録。項目と画面は範囲記録と同じ(日時・4つの件数・メモ) */
 export function TrackSheet({
   track, justFinished, onClose, onShowOnMap,
 }: { track: Track; justFinished?: boolean; onClose: () => void; onShowOnMap?: () => void }) {
-  const { visits, pins, toast } = useStore();
-  const [title, setTitle] = useState(track.title);
-  const [feel, setFeel] = useState<TrackFeel | null>(track.feel);
+  const { visits, toast } = useStore();
+  const fromPins = useMemo(() => countVisits(visitsInTrack(track, visits)), [track, visits]);
+  const [at, setAt] = useState(() => toLocalInput(new Date(track.recordedAt ?? track.startedAt)));
+  const [c, setC] = useState<SalesCounts>(() => track.counts ?? fromPins);
   const [memo, setMemo] = useState(track.memo);
 
-  const vs = useMemo(() => visitsInTrack(track, visits), [track, visits]);
-  const st = trackStats(vs);
-  const areas = useMemo(() => {
-    const byId = new Map(pins.map((p) => [p.id, p]));
-    return [...new Set(vs.map((v) => byId.get(v.pinId)?.areaName).filter((x): x is string => !!x))];
-  }, [vs, pins]);
-
   const save = async () => {
-    await saveTrack({ ...track, title: title.trim(), feel, memo: memo.trim() });
-    toast('足跡と成果を保存しました');
+    await saveTrack({ ...track, recordedAt: new Date(at).toISOString(), counts: c, memo: memo.trim() });
+    toast(track.counts ? '足跡の記録を更新しました' : '足跡の営業記録を保存しました');
     onClose();
   };
 
   const remove = async () => {
-    if (!window.confirm(`「${trackName(track)}」の足跡を削除しますか?(訪問記録は残ります)`)) return;
+    if (!window.confirm(`「${trackName(track)}」の足跡を削除しますか?(ピンの訪問記録は残ります)`)) return;
     await deleteTrack(track.id);
     toast('足跡を削除しました');
     onClose();
   };
 
-  const end = new Date(trackEndMs(track));
   return (
     <BottomSheet
-      title={
-        <>
-          {justFinished ? '足跡記録を終了しました' : trackName(track)}
-          <small>
-            {formatDateTime(track.startedAt)}〜{end.getHours()}:{String(end.getMinutes()).padStart(2, '0')}
-          </small>
-        </>
-      }
+      title={justFinished ? '足跡記録を終了しました' : '足跡の営業記録'}
       onClose={onClose}
       tall
-      footer={
-        <div className="btn-stack">
-          <button className="btn btn-primary btn-block btn-lg" onClick={save}>成果を保存</button>
-        </div>
-      }
+      footer={<button className="btn btn-primary btn-block btn-lg" onClick={save}>{track.counts ? '更新' : '保存'}</button>}
     >
-      <div className="track-stats">
-        <div><b>{formatDuration(trackEndMs(track) - Date.parse(track.startedAt))}</b><small>時間</small></div>
-        <div><b>{formatDistance(track.distanceM)}</b><small>移動</small></div>
-        <div><b>{st.visits}</b><small>訪問</small></div>
-        <div><b>{st.home}</b><small>在宅</small></div>
-        <div><b>{st.talked}</b><small>話せた</small></div>
-        <div className={st.appointed ? 'good' : ''}><b>{st.appointed}</b><small>アポ・成約</small></div>
-      </div>
-      <p className="muted small">
-        訪問の数は、この足跡を記録していた時間に保存した訪問記録から数えています{st.contract > 0 && `(うち成約 ${st.contract}件)`}。
-        {areas.length > 0 && <><br />回った町丁目: {areas.join('、')}</>}
+      <p className="track-info">
+        👣 {formatDuration(trackEndMs(track) - Date.parse(track.startedAt))} ・ {formatDistance(track.distanceM)}
+        {onShowOnMap && track.points.length > 0 && (
+          <button className="link-btn" onClick={onShowOnMap}>地図で足跡を見る</button>
+        )}
       </p>
-      {onShowOnMap && track.points.length > 0 && (
-        <button className="btn btn-outline btn-block" style={{ marginBottom: 12 }} onClick={onShowOnMap}>地図で足跡を見る</button>
-      )}
       {track.points.length === 0 && <div className="alert alert-warn" style={{ marginBottom: 12 }}>位置が記録できませんでした(移動が少ない・電波が弱いなど)</div>}
-
-      <Field label="名前" hint="任意">
-        <input className="input" value={title} maxLength={40} placeholder={trackName({ ...track, title: '' })} onChange={(e) => setTitle(e.target.value)} />
-      </Field>
-      <Field label="手応え">
-        <Choice options={FEEL_OPTS} value={feel} onChange={setFeel} allowClear />
-      </Field>
-      <Field label="成果・ふりかえりメモ">
-        <textarea className="input" rows={3} value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="例: 午後の新興住宅地は在宅が多い。次は○○方面を回る" />
-        <p className="privacy-note">{PRIVACY_NOTE}</p>
-      </Field>
+      <SalesRecordFields
+        at={at}
+        onAt={setAt}
+        counts={c}
+        onCounts={setC}
+        memo={memo}
+        onMemo={setMemo}
+        fromPins={fromPins}
+        fromPinsLabel="この足跡の時間のピンの記録"
+      />
       <button className="link-btn danger" onClick={remove}>この足跡を削除</button>
     </BottomSheet>
   );
@@ -104,22 +73,22 @@ export function TrackListSheet({
         <button className="btn btn-primary btn-block btn-lg" onClick={onStart}>👣 足跡記録を開始</button>
       )}
       <p className="muted small">
-        開始してから終了するまでの移動を記録し、その間に保存した訪問記録と一緒に成果としてまとめます。
+        開始してから終了するまでの移動を記録し、終了したら範囲記録と同じ項目(日時・訪問・話ができた・再訪予約・成約・メモ)で営業記録を保存します。
         記録中は画面を消さないようにします(画面を消したり別のアプリを開いている間は、位置を記録できないことがあります)。
       </p>
       <ul className="track-list">
         {tracks.map((t) => {
-          const st = trackStats(visitsInTrack(t, visits));
+          const c = trackCounts(t, visits);
           return (
             <li key={t.id}>
               <button onClick={() => onOpen(t)}>
                 <div className="track-list-head">
-                  <b>{trackName(t)}</b>
-                  {t.feel && <span>{FEEL_ICON[t.feel]}</span>}
+                  <b>{formatDateTime(t.recordedAt ?? t.startedAt)}</b>
+                  <span className="muted small">{formatDuration(trackEndMs(t) - Date.parse(t.startedAt))} ・ {formatDistance(t.distanceM)}</span>
                 </div>
-                <div className="muted small">
-                  {formatDateTime(t.startedAt)} ・ {formatDuration(trackEndMs(t) - Date.parse(t.startedAt))} ・ {formatDistance(t.distanceM)} ・ 訪問{st.visits}件
-                  {st.appointed > 0 && <b className="good-text"> ・ アポ{st.appointed}</b>}
+                <div className="small">
+                  訪問{c.visited} ・ 話{c.talked} ・ 再訪{c.revisit} ・ {c.contract > 0 ? <b className="good-text">成約{c.contract}</b> : '成約0'}
+                  {!t.counts && <span className="muted">(未保存)</span>}
                 </div>
                 {t.memo && <div className="small track-memo">{t.memo}</div>}
               </button>

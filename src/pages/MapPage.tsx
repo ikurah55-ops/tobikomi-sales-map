@@ -371,7 +371,7 @@ export function MapPage() {
           {viewTrack && <TrackLayer points={viewTrack.points} color="#7c3aed" onSelect={() => !drawing && setTrackSheet({ track: viewTrack })} />}
           {recordingTrack && <TrackLayer points={recordingTrack.points} color="#dc2626" live />}
           {pos && <LocationLayer pos={pos} heading={compass} />}
-          <MapEvents onLongPress={(lat, lng) => openNewPin(lat, lng, 'press')} onUserMove={() => setFollow(false)} />
+          <MapEvents onLongPress={(lat, lng) => !drawing && openNewPin(lat, lng, 'press')} onUserMove={() => setFollow(false)} />
         </MapContainer>
 
         {drawing && (

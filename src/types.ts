@@ -193,6 +193,14 @@ export interface Settings {
 export type TrackPoint = [number, number, number, number];
 export type TrackFeel = 'good' | 'normal' | 'bad';
 
+/** 営業成果の件数(範囲記録・足跡で共通) */
+export interface SalesCounts {
+  visited: number; // 訪問した件数
+  talked: number; // 話ができた件数
+  revisit: number; // 再訪の予約ができた件数
+  contract: number; // 成約した件数
+}
+
 /** 足跡記録1回分。訪問記録とは記録していた時間帯で結びつける */
 export interface Track {
   id: string;
@@ -200,23 +208,22 @@ export interface Track {
   endedAt: string | null; // 記録中は null
   points: TrackPoint[];
   distanceM: number;
-  title: string;
-  feel: TrackFeel | null; // 手応え
+  title: string; // 旧版の名前(今は入力しない)
+  feel: TrackFeel | null; // 旧版の手応え(今は入力しない)
   memo: string;
+  /** 営業成果。保存する前は undefined(訪問記録から数えて表示する) */
+  recordedAt?: string;
+  counts?: SalesCounts;
   updatedAt: string;
 }
 
 // ---------- 範囲の営業記録(地図を指で囲って件数をまとめて記録) ----------
 
-export interface AreaRecord {
+export interface AreaRecord extends SalesCounts {
   id: string;
   /** 囲んだ範囲 [緯度, 経度] の並び */
   polygon: [number, number][];
   recordedAt: string; // ISO(営業した日時)
-  visited: number; // 訪問した件数
-  talked: number; // 話ができた件数
-  revisit: number; // 再訪の予約ができた件数
-  contract: number; // 成約した件数
   memo: string;
   createdAt: string;
   updatedAt: string;

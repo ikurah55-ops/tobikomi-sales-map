@@ -463,3 +463,9 @@ textarea.input { resize: vertical; }
   position: absolute; bottom: 14px; left: 0; transform: translateX(-50%); white-space: nowrap; background: #dc2626; color: #fff;
   font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,.25);
 }
+.addr-search-head { padding: 8px 14px 4px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.addr-search-hist { display: flex; align-items: stretch; border-bottom: 1px solid var(--line); }
+.addr-search-hist:last-child { border-bottom: 0; }
+.addr-search-list .addr-search-hist button { border-bottom: 0; font-size: 15px; }
+.addr-search-list .addr-search-hist button:first-child { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.addr-search-list .addr-search-hist-del { width: 44px; flex: 0 0 44px; text-align: center; color: var(--muted); font-size: 13px; }

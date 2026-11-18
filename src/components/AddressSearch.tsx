@@ -69,6 +69,25 @@ async function zipToAddress(zip: string): Promise<{ pref: string; city: string; 
   return r ? { pref: r.address1, city: r.address2, town: r.address3 } : null;
 }
 
+// ---- 検索履歴(この端末だけ・新しい順に3件) ----
+const HISTORY_KEY = 'tobikomi-search-history-v1';
+const HISTORY_MAX = 3;
+function loadHistory(): string[] {
+  try {
+    const v = JSON.parse(localStorage.getItem(HISTORY_KEY) ?? '[]');
+    return Array.isArray(v) ? v.filter((x) => typeof x === 'string').slice(0, HISTORY_MAX) : [];
+  } catch {
+    return [];
+  }
+}
+function saveHistory(list: string[]) {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+  } catch {
+    /* 保存できなくても検索は使える */
+  }
+}
+
 /** 地図の上の検索バー: 町の名前・住所・郵便番号で探して、その場所へ移動する */
 export function AddressSearch({ regions, onPick, onClear, hasMarker }: {
   regions: StoredRegion[];
@@ -82,13 +101,32 @@ export function AddressSearch({ regions, onPick, onClear, hasMarker }: {
   const [online, setOnline] = useState<SearchHit[] | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [history, setHistory] = useState<string[]>(loadHistory);
+
+  const remember = (word: string) => {
+    const w = word.trim();
+    if (!w) return;
+    setHistory((h) => {
+      const next = [w, ...h.filter((x) => normalize(x) !== normalize(w))].slice(0, HISTORY_MAX);
+      saveHistory(next);
+      return next;
+    });
+  };
+  const forget = (word: string) => {
+    setHistory((h) => {
+      const next = h.filter((x) => x !== word);
+      saveHistory(next);
+      return next;
+    });
+  };
 
   // 入力中は端末内の町丁目から候補を出す
   const nq = normalize(q);
   const isZip = ZIP_RE.test(nq);
   const local = useMemo(() => (isZip ? [] : searchAreas(regions, q)), [regions, q, isZip]);
 
-  const pick = (h: SearchHit) => {
+  const pickHit = (h: SearchHit, word = q) => {
+    remember(word);
     setOpen(false);
     setOnline(null);
     setMsg(null);
@@ -96,8 +134,12 @@ export function AddressSearch({ regions, onPick, onClear, hasMarker }: {
     onPick(h);
   };
 
-  const submit = async () => {
+  const submit = async (word = q) => {
+    const nq = normalize(word);
     if (!nq) return;
+    const local = ZIP_RE.test(nq) ? [] : searchAreas(regions, word);
+    const pick = (h: SearchHit) => pickHit(h, word);
+    remember(word); // 「検索」を押した言葉は履歴に残す
     setBusy(true);
     setMsg(null);
     setOnline(null);
@@ -126,7 +168,8 @@ export function AddressSearch({ regions, onPick, onClear, hasMarker }: {
     }
   };
 
-  const showList = open && (local.length > 0 || (online?.length ?? 0) > 0 || !!msg || busy);
+  const showHistory = open && !nq && !busy && history.length > 0;
+  const showList = open && !!nq && (local.length > 0 || (online?.length ?? 0) > 0 || !!msg || busy);
 
   return (
     <div className="addr-search">
@@ -144,6 +187,7 @@ export function AddressSearch({ regions, onPick, onClear, hasMarker }: {
           value={q}
           onChange={(e) => { setQ(e.target.value); setOnline(null); setMsg(null); setOpen(true); }}
           onFocus={() => setOpen(true)}
+          onClick={() => setOpen(true)}
           aria-label="町名・住所・郵便番号で検索"
         />
         {(q || hasMarker) && (
@@ -152,20 +196,37 @@ export function AddressSearch({ regions, onPick, onClear, hasMarker }: {
         <button type="submit" className="addr-search-go" disabled={!nq || busy}>{busy ? '…' : '検索'}</button>
       </form>
 
+      {showHistory && (
+        <>
+          <div className="addr-search-backdrop" onClick={() => setOpen(false)} />
+          <ul className="addr-search-list">
+            <li className="addr-search-head">最近の検索</li>
+            {history.map((w) => (
+              <li key={w} className="addr-search-hist">
+                <button onClick={() => { setQ(w); submit(w); }}>
+                  <span aria-hidden>🕘</span> {w}
+                </button>
+                <button className="addr-search-hist-del" aria-label={`「${w}」を履歴から消す`} onClick={() => forget(w)}>✕</button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
       {showList && (
         <>
           <div className="addr-search-backdrop" onClick={() => setOpen(false)} />
           <ul className="addr-search-list">
             {local.map((h) => (
               <li key={`a-${h.kind === 'area' ? h.feature.properties.key : ''}`}>
-                <button onClick={() => pick(h)}>
+                <button onClick={() => pickHit(h)}>
                   <b>{h.label}</b><small>{h.sub}・町丁目</small>
                 </button>
               </li>
             ))}
             {online?.map((h, i) => (
               <li key={`p-${i}`}>
-                <button onClick={() => pick(h)}>
+                <button onClick={() => pickHit(h)}>
                   <b>{h.label}</b><small>{h.sub}</small>
                 </button>
               </li>

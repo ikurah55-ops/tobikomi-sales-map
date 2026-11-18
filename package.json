@@ -11,7 +11,8 @@
     "data:build": "node scripts/preprocess.mjs",
     "data:facilities": "node scripts/facilities.mjs",
     "data:inspect": "node scripts/preprocess.mjs --inspect",
-    "icons": "node scripts/make-icons.mjs"
+    "icons": "node scripts/make-icons.mjs",
+    "kana": "node scripts/kana.mjs"
   },
   "dependencies": {
     "dexie": "^4.0.11",

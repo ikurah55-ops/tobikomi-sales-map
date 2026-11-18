@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { AreaFeature, StoredRegion } from '../types';
 
 /** 検索結果1件 */
@@ -14,11 +14,93 @@ const normalize = (s: string) =>
   s.normalize('NFKC').replace(/[\s　]/g, '').replace(/^〒/, '').replace(/[‐‑‒–—―−]/g, '-'); // いろいろなハイフンをそろえる
 const ZIP_RE = /^(\d{3})-?(\d{4})$/;
 
+// ---- 町丁目名の読みがな(ひらがな入力で候補を出す) ----
+/** 市区町村コード → { 町丁目名: よみ } */
+type KanaDict = Map<string, Record<string, string>>;
+const KANA_CACHE = 'tobikomi-kana-v1-';
+const toHira = (s: string) => s.replace(/[ァ-ヶ]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
+/** 「とおかまち」と「とうかまち」、「おおの」と「おうの」のような書き方の揺れをそろえる */
+const foldKana = (s: string) => s.replace(/([おこそとのほもよろごぞどぼぽょ])[うお]/g, '$1う');
+const isKana = (s: string) => /^[ぁ-ゖー]+$/.test(s);
+
+/** 「本町一丁目」「本町二丁目」… を丁目の数字の順に並べる */
+const KANJI_VAL: Record<string, number> = { 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
+const chomeNum = (s: string) => {
+  const m = s.match(/([一二三四五六七八九]?)(十?)([一二三四五六七八九]?)丁目$/);
+  if (!m || (!m[1] && !m[2] && !m[3])) return 0;
+  return m[2] ? (KANJI_VAL[m[1]] ?? 1) * 10 + (KANJI_VAL[m[3]] ?? 0) : KANJI_VAL[m[1] || m[3]] ?? 0;
+};
+const byChome = (a: string, b: string) => {
+  const ba = a.replace(/[一二三四五六七八九十]+丁目$/, '');
+  const bb = b.replace(/[一二三四五六七八九十]+丁目$/, '');
+  return ba.length - bb.length || ba.localeCompare(bb, 'ja') || chomeNum(a) - chomeNum(b);
+};
+
+/** 入っている地域の読みがな辞書を読む(一度読んだら端末に残すので、次からは電波がなくても使える) */
+function useKana(regions: StoredRegion[]): KanaDict {
+  const [dict, setDict] = useState<KanaDict>(new Map());
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const next: KanaDict = new Map();
+      for (const r of regions) {
+        let d: Record<string, string> | null = null;
+        try {
+          d = JSON.parse(localStorage.getItem(KANA_CACHE + r.code) ?? 'null');
+        } catch {
+          d = null;
+        }
+        if (!d) {
+          try {
+            const res = await fetch(`${import.meta.env.BASE_URL}data/kana/${r.code}.json`);
+            if (res.ok) {
+              d = (await res.json()) as Record<string, string>;
+              try {
+                localStorage.setItem(KANA_CACHE + r.code, JSON.stringify(d));
+              } catch {
+                /* 保存できなくても、この場では使える */
+              }
+            }
+          } catch {
+            /* 電波がないときは漢字の検索だけ */
+          }
+        }
+        if (d) next.set(r.code, d);
+      }
+      if (alive) setDict(next);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [regions]);
+  return dict;
+}
+
 /** 端末に入っている地域データの町丁目名から探す(電波がなくても使える) */
-function searchAreas(regions: StoredRegion[], raw: string, cityHint?: string): SearchHit[] {
+function searchAreas(regions: StoredRegion[], raw: string, cityHint?: string, kana?: KanaDict): SearchHit[] {
   let q = normalize(raw);
   if (!q) return [];
   const hits: { hit: SearchHit; rank: number }[] = [];
+  // ひらがな・カタカナだけの入力は読みで探す(「ほんちょう」→「本町一丁目」)
+  const hq = foldKana(toHira(q));
+  if (kana && isKana(hq)) {
+    for (const r of regions) {
+      const d = kana.get(r.code);
+      for (const f of r.data.features) {
+        const name = f.properties.name;
+        const y = d?.[name] ? foldKana(d[name]) : undefined;
+        let rank = -1;
+        if (y) {
+          if (y === hq) rank = 3;
+          else if (y.startsWith(hq)) rank = 2;
+          else if (hq.length >= 2 && y.includes(hq)) rank = 1;
+        }
+        if (rank < 0 && name.includes(q)) rank = 1; // 「あかねケ丘」のように名前にひらがなが入っている町
+        if (rank >= 0) hits.push({ hit: { kind: 'area', label: name, sub: `${r.prefName}${r.name}`, regionCode: r.code, feature: f }, rank });
+      }
+    }
+    return hits.sort((a, b) => b.rank - a.rank || byChome(a.hit.label, b.hit.label)).slice(0, 8).map((h) => h.hit);
+  }
   for (const r of regions) {
     if (cityHint && r.name !== cityHint) continue;
     // 「山形市本町」のように県名・市区町村名から書いた場合は、その市の中だけで探す
@@ -102,6 +184,7 @@ export function AddressSearch({ regions, onPick, onClear, hasMarker }: {
   const [msg, setMsg] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [history, setHistory] = useState<string[]>(loadHistory);
+  const kana = useKana(regions);
 
   const remember = (word: string) => {
     const w = word.trim();
@@ -123,7 +206,7 @@ export function AddressSearch({ regions, onPick, onClear, hasMarker }: {
   // 入力中は端末内の町丁目から候補を出す
   const nq = normalize(q);
   const isZip = ZIP_RE.test(nq);
-  const local = useMemo(() => (isZip ? [] : searchAreas(regions, q)), [regions, q, isZip]);
+  const local = useMemo(() => (isZip ? [] : searchAreas(regions, q, undefined, kana)), [regions, q, isZip, kana]);
 
   const pickHit = (h: SearchHit, word = q) => {
     remember(word);
@@ -137,7 +220,7 @@ export function AddressSearch({ regions, onPick, onClear, hasMarker }: {
   const submit = async (word = q) => {
     const nq = normalize(word);
     if (!nq) return;
-    const local = ZIP_RE.test(nq) ? [] : searchAreas(regions, word);
+    const local = ZIP_RE.test(nq) ? [] : searchAreas(regions, word, undefined, kana);
     const pick = (h: SearchHit) => pickHit(h, word);
     remember(word); // 「検索」を押した言葉は履歴に残す
     setBusy(true);

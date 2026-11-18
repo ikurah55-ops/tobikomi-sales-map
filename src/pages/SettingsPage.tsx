@@ -337,6 +337,7 @@ export function SettingsPage() {
         <ul>
           <li>訪問記録は端末内(IndexedDB)にだけ保存し、外部には送信しません。</li>
           <li>氏名・電話番号・健康状態など個人情報は記録しないでください。</li>
+          <li>地図の検索バーで「検索」を押すと、入れた言葉を国土地理院の住所検索(郵便番号は zipcloud)に送って場所を調べます。町丁目の候補は端末内のデータから出します。</li>
           <li>地図・店と駐車場の情報: © OpenStreetMap contributors</li>
           <li>
             統計: {regions.some((r) => r.isDummy)

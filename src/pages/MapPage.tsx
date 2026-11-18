@@ -1,6 +1,7 @@
-import type L from 'leaflet';
+import L from 'leaflet';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AttributionControl, MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
+import { AttributionControl, MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
+import { AddressSearch, type SearchHit } from '../components/AddressSearch';
 import { AreaSheet } from '../components/AreaSheet';
 import { FilterSheet } from '../components/FilterSheet';
 import { FacilitySheet } from '../components/FacilitySheet';
@@ -41,6 +42,8 @@ export function MapPage() {
   const [showFilter, setShowFilter] = useState(false);
   const [showLegend, setShowLegend] = useState(false);
   const [regionMenu, setRegionMenu] = useState(false);
+  // ---- 住所検索で移動した先の目印 ----
+  const [searchMark, setSearchMark] = useState<{ lat: number; lng: number; label: string } | null>(null);
   // ---- 範囲の営業記録 ----
   const [drawing, setDrawing] = useState(false);
   const [areaForm, setAreaForm] = useState<{ polygon: [number, number][]; record?: AreaRecord } | null>(null);
@@ -105,6 +108,29 @@ export function MapPage() {
     const c = map.getSize().divideBy(2);
     if (p.distanceTo(c) > 4) map.panTo([pos.lat, pos.lng], { animate: true });
   }, [follow, pos]);
+
+  // 検索バーで選んだ場所へ移動(中央にしてズーム)
+  const goToSearchHit = (h: SearchHit) => {
+    const map = mapRef.current;
+    if (!map) return;
+    pendingFly.current = null;
+    setFollow(false);
+    setSelectedPin(null);
+    setSelectedArea(null);
+    setSelectedFacility(null);
+    if (h.kind === 'area') {
+      if (h.regionCode !== settings.activeRegion) switchRegion(h.regionCode, false);
+      const b = featureBounds(h.feature);
+      const c = L.latLngBounds(b).getCenter();
+      setSearchMark({ lat: c.lat, lng: c.lng, label: h.label });
+      setTimeout(() => map.fitBounds(b, { padding: [40, 40], maxZoom: 17 }), 80);
+    } else {
+      const at = locate(regionFiles, h.lat, h.lng);
+      if (at && at.region.code !== settings.activeRegion) switchRegion(at.region.code, false);
+      setSearchMark({ lat: h.lat, lng: h.lng, label: h.label });
+      setTimeout(() => map.setView([h.lat, h.lng], 17), 80);
+    }
+  };
 
   // ランキングから町丁目を選んだとき
   useEffect(() => {
@@ -345,6 +371,18 @@ export function MapPage() {
             minZoom={FACILITY_MIN_ZOOM}
             onSelect={(f) => { setSelectedArea(null); setSelectedPin(null); setSelectedFacility(f); }}
           />
+          {searchMark && (
+            <Marker
+              position={[searchMark.lat, searchMark.lng]}
+              zIndexOffset={3000}
+              interactive={false}
+              icon={L.divIcon({
+                className: 'search-mark',
+                html: `<div class="search-mark-label">${searchMark.label.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`)}</div><div class="search-mark-dot"></div>`,
+                iconSize: [0, 0],
+              })}
+            />
+          )}
           <PinLayer pins={visiblePins} visitsByPin={visitsByPin} onSelect={(p: Pin) => { setSelectedArea(null); setSelectedPin(p.id); }} />
           <AreaRecordLayer
             records={shownAreaRecords}
@@ -362,7 +400,11 @@ export function MapPage() {
           />
         )}
 
-        <div className="map-chips">
+        {!drawing && (
+          <AddressSearch regions={regions} onPick={goToSearchHit} onClear={() => setSearchMark(null)} hasMarker={!!searchMark} />
+        )}
+
+        <div className={`map-chips${drawing ? '' : ' below-search'}`}>
           {drawing && (
             <span className="draw-hint">
               <span>1本指でなぞって範囲を囲む<br /><small>2本指で拡大・移動</small></span>
